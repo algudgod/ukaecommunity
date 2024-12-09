@@ -1,8 +1,7 @@
 package com.community.ukae.entity.user;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.community.ukae.dto.UserDto;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @Column(name = "login_id", nullable = false, length = 20)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String loginId;
     @Column(insertable = false) // default: Y
     private String useYn;
@@ -35,5 +34,18 @@ public class User {
     @Column(updatable = false, insertable = false)
     private LocalDateTime createDate;
     private LocalDateTime withdrawDate;
+
+    // JPA 기본 생성자
+    public User() {}
+
+    // DTO → 엔티티 변환을 위한 생성자
+    public User(UserDto userDto) {
+        this.loginId = userDto.getLoginId();
+        this.password = userDto.getPassword();
+        this.email = userDto.getEmail();
+        this.name = userDto.getName();
+        this.nickname = userDto.getNickname();
+        this.phone = userDto.getPhone();
+    }
 
 }
