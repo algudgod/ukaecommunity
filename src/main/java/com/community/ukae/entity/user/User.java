@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String loginId;
     @Column(insertable = false) // default: Y
     private String useYn;
