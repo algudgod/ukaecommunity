@@ -1,6 +1,6 @@
 package com.community.ukae.entity.user;
 
-import com.community.ukae.dto.UserDto;
+import com.community.ukae.dto.user.UserDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,7 +38,7 @@ public class User {
     public User() {}
 
     // DTO → 엔티티 변환을 위한 생성자
-    public User(UserDto userDto) {
+    public User(UserDTO userDto) {
         this.loginId = userDto.getLoginId();
         this.password = userDto.getPassword();
         this.email = userDto.getEmail();

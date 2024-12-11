@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -16,217 +16,362 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-  </head>
+</head>
 
-  <body>
-  <!-- 회원가입 -->
-  <div class="row justify-content-center mt-5">
+<body>
+<!-- 회원가입 -->
+<div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4"> <!-- row=12칸 시스템 화면 기준 레이아웃-->
-      <h3 class="text-center mb-2">회원 가입</h3>
+        <h3 class="text-center mb-2">회원 가입</h3>
 
-      <!-- 구분선 추가 -->
-      <div class="d-flex justify-content-center">
-        <hr style="width: 100%; border: 1px solid #000;">
-      </div>
-
-      <form id="addUserForm" action="/user/addUser" method="post">
-
-        <div class="mb-3">
-          <div class="input-group">
-            <input type="text" id="loginId" name="loginId" class="form-control" required maxlength="20" placeholder="아이디를 입력하세요">
-            <button type="button" class="btn btn-outline-dark" onclick="checkLoginId()">중복 확인</button>
-          </div>
-          <div id="loginIdCheckResult" class="mt-2"></div> <!-- 아이디 중복 확인 내용 출력 -->
+        <!-- 구분선 추가 -->
+        <div class="d-flex justify-content-center">
+            <hr style="width: 100%; border: 1px solid #000;">
         </div>
 
-        <div class="mb-3">
-          <div class="input-group">
-          <input type="password" id="password" name="password" class="form-control" required maxlength="100" placeholder="비밀번호를 입력하세요">
-          <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" required maxlength="100" placeholder="비밀번호 확인">
-        </div>
-          <div id="passwordCheckResult" class="mt-2"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
-        </div>
+        <form id="addUserForm" action="/user/addUser" method="post">
 
-        <div class="row mb-3">
-          <div class="col-md-8">
-            <input type="text" id="name" name="name" class="form-control" required maxlength="50" placeholder="이름">
-          </div>
-
-          <div class="col-md-4 d-flex align-items-center">
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" id="gender_male" name="gender" value="M" required>
-              <label class="form-check-label" for="gender_male">남</label>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="loginId" name="loginId" class="form-control" required maxlength="20"
+                           placeholder="아이디를 입력하세요">
+                    <button type="button" class="btn btn-outline-dark" onclick="checkLoginId()">중복 확인</button>
+                </div>
+                <div id="loginIdCheckResult" class="mt-2"></div> <!-- 아이디 중복 확인 내용 출력 -->
             </div>
-            <div class="form-check form-check-inline">
-              <input class="form-check-input" type="radio" id="gender_female" name="gender" value="F" required>
-              <label class="form-check-label" for="gender_female">여</label>
+
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="password" id="password" name="password" class="form-control" required maxlength="100"
+                           placeholder="비밀번호를 입력하세요">
+                    <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" required
+                           maxlength="100" placeholder="비밀번호 확인">
+                </div>
+                <div id="passwordCheckResult" class="mt-2"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
             </div>
-          </div>
-        </div>
 
-        <div class="mb-3">
-          <div class="input-group">
-            <input type="text" id="nickname" name="nickname" class="form-control" required maxlength="20" placeholder="닉네임을 입력하세요">
-            <button type="button" class="btn btn-outline-dark" onclick="checkNickname()">중복 확인</button>
-          </div>
-          <div id="nicknameCheckResult" class="text-danger mt-2"></div> <!-- 닉네임 중복 확인 결과 출력 -->
-        </div>
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input type="text" id="name" name="name" class="form-control" required maxlength="50"
+                           placeholder="이름">
+                </div>
 
-        <div class="mb-3">
-          <div class="input-group">
-            <!-- 전화번호 입력 -->
-            <input type="tel" id="phone" name="phone" class="form-control" required maxlength="20"
-                   placeholder="전화번호를 입력하세요 (010-1234-5678)"
-                   pattern="^\d{3}-\d{3,4}-\d{4}$">
-            <!-- 인증하기 버튼 -->
-            <button type="button" class="btn btn-outline-dark" onclick="sendPhoneVerification()">인증 하기</button>
-          </div>
-          <div id="phoneVerificationResult" class="text-danger mt-2"></div> <!-- 전화번호 인증 결과 메시지 출력 -->
-        </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="gender_male" name="gender" value="M" required>
+                        <label class="form-check-label" for="gender_male">남</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="gender_female" name="gender" value="F"
+                               required>
+                        <label class="form-check-label" for="gender_female">여</label>
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-3">
-          <div class="input-group">
-            <input type="text" id="addPostcode" name="postcode" class="form-control" readonly placeholder="우편번호">
-            <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="주소 찾기">
-          </div>
-        </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="nickname" name="nickname" class="form-control" required maxlength="20"
+                           placeholder="닉네임을 입력하세요">
+                    <button type="button" class="btn btn-outline-dark" onclick="checkNickname()">중복 확인</button>
+                </div>
+                <div id="nicknameCheckResult" class="mt-2"></div> <!-- 닉네임 중복 확인 결과 출력 -->
+            </div>
 
-        <div class="mb-3">
-          <input type="text" id="addr" name="addr" class="form-control" readonly placeholder="주소" maxlength="100">
-        </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <!-- 전화번호 입력 -->
+                    <input type="tel" id="phone" name="phone" class="form-control" required maxlength="20"
+                           placeholder="전화번호를 입력하세요 (010-1234-5678)"
+                           pattern="^\d{3}-\d{3,4}-\d{4}$">
+                    <!-- 인증하기 버튼 -->
+                    <button type="button" class="btn btn-outline-dark" onclick="sendPhoneVerification()">인증 하기</button>
+                </div>
+                <div id="phoneVerificationResult" class="text-danger mt-2"></div> <!-- 전화번호 인증 결과 메시지 출력 -->
+            </div>
 
-        <div class="mb-3">
-          <input type="text" id="addrDetailAddress" name="addrDetail" class="form-control" placeholder="상세주소를 입력해 주세요" maxlength="100">
-        </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="addPostcode" name="postcode" class="form-control" readonly
+                           placeholder="우편번호">
+                    <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="주소 찾기">
+                </div>
+            </div>
 
-        <div class="mb-3">
-          <input type="text" id="addrExtraAddress" name="addrExtraAddress" class="form-control" readonly placeholder="비고">
-        </div>
+            <div class="mb-3">
+                <input type="text" id="addr" name="addr" class="form-control" readonly placeholder="주소" maxlength="100">
+            </div>
 
-        <div class="mb-3">
-          <div class="input-group">
-            <!-- 이메일 입력 -->
-            <input type="text" id="emailId" name="emailId" class="form-control" style="flex: 0 0 40%;" required placeholder="이메일">
+            <div class="mb-3">
+                <input type="text" id="addrDetailAddress" name="addrDetail" class="form-control"
+                       placeholder="상세주소를 입력해 주세요" maxlength="100">
+            </div>
 
-            <!-- @ 기호 -->
-            <span class="input-group-text" style="background-color: transparent; border: none; color: inherit;">@</span>
+            <div class="mb-3">
+                <input type="text" id="addrExtraAddress" name="addrExtraAddress" class="form-control" readonly
+                       placeholder="비고">
+            </div>
 
-            <!-- 도메인 입력 -->
-            <input type="text" id="emailDomain" name="emailDomain" class="form-control" required list="domains" placeholder="도메인">
-            <datalist id="domains">
-              <option value="gmail.com">
-              <option value="naver.com">
-              <option value="hanmail.net">
-            </datalist>
+            <div class="mb-3">
+                <div class="input-group">
+                    <!-- 이메일 입력 -->
+                    <input type="text" id="emailId" name="emailId" class="form-control" required placeholder="이메일">
 
-            <!-- 발송하기 버튼 -->
-            <button type="button" class="btn btn-outline-dark" onclick="sendVerificationEmail()">발송 하기</button>
-          </div>
-        </div>
+                    <!-- @ 기호 -->
+                    <span class="input-group-text">@</span>
 
-        <div class="mb-3">
-          <div class="input-group">
-            <!-- 토큰 입력 -->
-            <input type="text" id="token" name="token" class="form-control" placeholder="이메일로 전송된 토큰을 입력하세요" required>
+                    <!-- 도메인 입력 -->
+                    <input type="text" id="emailDomain" name="emailDomain" class="form-control" required list="domains"
+                           placeholder="도메인">
+                    <datalist id="domains">
+                        <option value="gmail.com">
+                        <option value="naver.com">
+                        <option value="hanmail.net">
+                        <option value="daum.net">
+                    </datalist>
+                    <!-- 발송하기 버튼 -->
+                    <button type="button" class="btn btn-outline-dark" onclick="sendEmail()">발송 하기</button>
+                </div>
+                <div id="emailSendResult" class="mt-2"></div> <!-- 이메일 발송 결과 출력 -->
 
-            <!-- 인증하기 버튼 -->
-            <button type="button" class="btn btn-outline-dark" onclick="verifyToken()">인증 하기</button>
-          </div>
+            </div>
 
-          <!-- 인증 결과 메시지 출력 -->
-          <div id="tokenCheckResult" class="text-danger mt-2"></div>
-        </div>
-
-        <input type="hidden" id="email" name="email">
-
-        <!-- 회원가입 버튼 -->
-        <div class="d-flex justify-content-center mt-3">
-          <button type="submit" class="btn btn-dark w-100">회원 가입</button>
-        </div>
-      </form>
+            <!-- 회원가입 버튼 -->
+            <div class="d-flex justify-content-center mt-3">
+                <button type="submit" class="btn btn-dark w-100">회원 가입</button>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
 
-  <script>
-  //회원 가입에 필요한 자바스크립트 함수 시작
+<script>
+    //회원 가입에 필요한 자바스크립트 함수 시작
+      //유효성 검사(loginId, password,nickname)
 
-  // loginId를 확인하기 위한 함수
-  function checkLoginId() {
-    const loginId = document.getElementById('loginId').value;
-    const resultLoginId = document.getElementById('loginIdCheckResult');
+    // loginId를 확인하기 위한 함수
+    function checkLoginId() {
+      const loginId = document.getElementById('loginId').value;
+      const resultLoginId = document.getElementById('loginIdCheckResult');
 
-  // loginId 입력 여부
-  if(!loginId) {
-    resultLoginId.textContent = "";
-    alert("아이디를 입력하세요.");
-    return;
-  }
-
-  // loginId 길이 유효성 검사
-  if (loginId.length < 5 || loginId.length > 20) {
-    resultLoginId.textContent = "";
-    alert("아이디는 5자 이상 20자 이하여야 합니다.");
-    return;
-  }
-
-  // 서버에 아이디 중복 확인 요청
-  fetch('/api/user/checkLoginId', {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({loginId: loginId})
-  })
-    .then(response => response.json())
-    .then(data => {
-      if(data.isAvailableLoginId) {
-        resultLoginId.textContent = "사용 가능한 아이디입니다.";
-        resultLoginId.classList.remove("text-danger");
-        resultLoginId.classList.add("text-success");
-      } else {
-        resultLoginId.textContent= "이미 사용 중인 아이디입니다.";
-        resultLoginId.classList.remove("text-success");
-        resultLoginId.classList.add("text-danger");
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert("잠시 후 다시 시도해 주세요.");
-    });
-  }
-
-  // password를 확인하기 위한 함수
-
-  // 비밀번호 확인 이벤트 연결
-  document.getElementById('password').addEventListener('input', checkPassword);
-  document.getElementById('passwordConfirm').addEventListener('input', checkPassword);
-
-  function checkPassword() {
-    const password = document.getElementById('password').value;
-    const passwordConfirm = document.getElementById('passwordConfirm').value;
-    const resultPassword = document.getElementById('passwordCheckResult');
-
-    // 결과 메시지와 클래스 설정 함수
-    function setResultMessage(message, isSuccess) {
-      resultPassword.textContent = message;
-      resultPassword.classList.remove("text-danger", "text-success");
-      resultPassword.classList.add(isSuccess ? "text-success" : "text-danger");
-    }
-
-    // password 길이 유효성 검사
-    if (password.length < 8 || password.length > 20) {
-      setResultMessage("비밀번호는 8자 이상 20자 이하여야 합니다.", false);
+    // loginId 입력 여부
+    if(!loginId) {
+      resultLoginId.textContent = "";
+      alert("아이디를 입력하세요.");
       return;
     }
 
-    if(password === passwordConfirm) {
-      setResultMessage("비밀번호가 일치합니다.", true);
-    } else {
-      setResultMessage("비밀번호가 일치하지 않습니다.", false);
+    // loginId 길이 유효성 검사
+    if (loginId.length < 5 || loginId.length > 20) {
+      resultLoginId.textContent = "";
+      alert("아이디는 5자 이상 20자 이하여야 합니다.");
+      return;
     }
-  }
 
-  </script>
+    // 서버에 아이디 중복 확인 요청
+    fetch('/api/user/checkLoginId', {
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({loginId: loginId})
+    })
+      .then(response => response.json())
+      .then(data => {
+        if(data.isAvailableLoginId) {
+          resultLoginId.textContent = "사용 가능한 아이디입니다.";
+          resultLoginId.classList.remove("text-danger");
+          resultLoginId.classList.add("text-success");
+        } else {
+          resultLoginId.textContent= "이미 사용 중인 아이디입니다.";
+          resultLoginId.classList.remove("text-success");
+          resultLoginId.classList.add("text-danger");
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert("잠시 후 다시 시도해 주세요.");
+      });
+    }
 
-  </body>
+    // password를 확인하기 위한 함수
+    // 비밀번호 확인 이벤트 연결
+    document.getElementById('password').addEventListener('input', checkPassword);
+    document.getElementById('passwordConfirm').addEventListener('input', checkPassword);
+
+    function checkPassword() {
+      const password = document.getElementById('password').value;
+      const passwordConfirm = document.getElementById('passwordConfirm').value;
+      const resultPassword = document.getElementById('passwordCheckResult');
+
+      // 결과 메세지 함수
+      function setResultMessage(message, isSuccess) {
+        resultPassword.textContent = message;
+        resultPassword.classList.remove("text-danger", "text-success");
+        resultPassword.classList.add(isSuccess ? "text-success" : "text-danger");
+      }
+
+      // 비밀번호 길이 유효성 검사
+      if (password.length < 8 || password.length > 20) {
+        setResultMessage("비밀번호는 8자 이상 20자 이하여야 합니다.", false);
+        return;
+      }
+      // 비밀번호 일치 여부 확인
+      if(password === passwordConfirm) {
+        setResultMessage("비밀번호가 일치합니다.", true);
+      } else {
+        setResultMessage("비밀번호가 일치하지 않습니다.", false);
+      }
+    }
+
+    // nickname을 확인하기 위한 함수
+    function checkNickname() {
+      const nickname = document.getElementById('nickname').value;
+      const resultNickname = document.getElementById('nicknameCheckResult');
+
+      // 닉네임 입력 여부
+      if(!nickname) {
+        resultNickname.textContent = "";
+        alert("별명을 입력하세요.");
+        return;
+      }
+
+      // 닉네임 길이 유효성 검사
+      if(nickname.length < 2 || nickname.length > 15) {
+        resultNickname.textContent = "";
+        alert("별명은 2자 이상 15자 이하여야 합니다.");
+        return;
+      }
+
+      //서버에 닉네임 중복 확인 요청
+      fetch('/api/user/checkNickname', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({nickname: nickname})
+      })
+        .then(response => response.json())
+        .then(data => {
+        if(data.isAvailableNickname){
+          resultNickname.textContent = "사용 가능한 닉네임입니다.";
+          resultNickname.classList.remove("text-danger");
+          resultNickname.classList.add("text-success");
+        } else {
+          resultNickname.textContent= "이미 사용 중인 닉네임입니다.";
+          resultNickname.classList.remove("text-success");
+          resultNickname.classList.add("text-danger");
+        }
+      })
+      .catch(error => {
+        console.error('Error:',error);
+        alert("잠시 후 다시 시도해 주세요.");
+        });
+      }
+
+
+
+      document.getElementById('emailId').addEventListener('input', checkEmail);
+      document.getElementById('emailDomain').addEventListener('input', checkEmail);
+
+    function checkEmail() {
+      const emailId = document.getElementById('emailId').value.trim();
+      const emailDomain = document.getElementById('emailDomain').value.trim();
+      const emailSendResult = document.getElementById('emailSendResult');
+
+      const validDomains = ["gmail.com", "naver.com", "hanmail.net","daum.net"];
+
+      // 이메일 입력 여부 확인
+      if (!emailId || !emailDomain) {
+        emailSendResult.textContent = "이메일과 도메인을 모두 입력하세요.";
+        emailSendResult.classList.add("text-danger");
+        emailSendResult.classList.remove("text-success");
+        return;
+      }
+
+        // 도메인이 유효한지 검사
+      if (!validDomains.includes(emailDomain)) {
+        emailSendResult.textContent = "유효하지 않은 도메인입니다.";
+        emailSendResult.classList.add("text-danger");
+        emailSendResult.classList.remove("text-success");
+        return;
+      }
+
+      // 이메일 합치기
+      const fullEmail = `${emailId}@${emailDomain}`;
+
+      fetch('/api/user/checkEmail', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email: fullEmail })
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.isAvailableEmail) {
+              emailSendResult.textContent = "사용 가능한 이메일입니다.";
+              emailSendResult.classList.add("text-success");
+              emailSendResult.classList.remove("text-danger");
+            } else {
+              emailSendResult.textContent = "이미 가입 된 이메일입니다.";
+              emailSendResult.classList.add("text-danger");
+              emailSendResult.classList.remove("text-success");
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert("잠시 후 다시 시도해 주세요.");
+          });
+      }
+    function sendEmail() {
+      const emailId = document.getElementById('emailId').value.trim();
+      const emailDomain = document.getElementById('emailDomain').value.trim();
+      const emailSendResult = document.getElementById('emailSendResult');
+
+      // 이메일 입력 여부 확인 (유효성 검사는 이미 `checkEmail`에서 처리)
+      if (!emailId || !emailDomain) {
+        emailSendResult.textContent = "이메일과 도메인을 모두 입력하세요.";
+        emailSendResult.classList.add("text-danger");
+        emailSendResult.classList.remove("text-success");
+        return;
+      }
+
+      // 이메일 합치기
+      const fullEmail = `${emailId}@${emailDomain}`;
+
+      // 이메일 발송 요청
+      fetch('/api/email/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: fullEmail,
+          subject: "유쾌 커뮤니티 이메일 인증 메일입니다.",
+          content: `<h1>유쾌 커뮤니티 가입 인증</h1>
+                    <p>아래 버튼을 클릭하여 인증을 완료하세요:</p>
+                    <a href="http://localhost:8080/api/verify?email=${fullEmail}" target="_blank">인증하기</a>`
+        })
+      })
+        .then(response => {
+          if (response.ok) {
+            emailSendResult.textContent = "이메일이 성공적으로 발송되었습니다!";
+            emailSendResult.classList.add("text-success");
+            emailSendResult.classList.remove("text-danger");
+          } else {
+            throw new Error("이메일 발송 실패");
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          emailSendResult.textContent = "이메일 발송 실패. 다시 시도해주세요.";
+          emailSendResult.classList.add("text-danger");
+          emailSendResult.classList.remove("text-success");
+        });
+    }
+
+
+</script>
+
+</body>
 </html>

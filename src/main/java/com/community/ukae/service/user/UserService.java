@@ -1,7 +1,5 @@
 package com.community.ukae.service.user;
 
-import com.community.ukae.dto.UserDto;
-import com.community.ukae.entity.user.User;
 import com.community.ukae.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +12,12 @@ public class UserService {
 
     public boolean checkLoginId(String loginId) {
         return !userRepository.existsByLoginId(loginId);
+    }
+    public boolean checkNickname(String nickname){
+        return !userRepository.existsByNickname(nickname);
+    }
+    public boolean checkEmail(String email){
+        return !userRepository.existsByEmail(email);
     }
 
 
