@@ -29,7 +29,7 @@
             <hr style="width: 100%; border: 1px solid #000;">
         </div>
 
-        <form id="addUserForm" action="/user/addUser" method="post">
+        <form id="addUserForm" action="/user/addUser" method="post" onsubmit="return validateFormBeforeSubmit()">
 
             <div class="mb-3">
                 <div class="input-group">
@@ -97,23 +97,23 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                    <input type="text" id="addrPostcode" name="postcode" class="form-control" readonly
+                    <input type="text" id="postcode" name="postcode" class="form-control" readonly
                            placeholder="우편번호">
                     <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="주소 찾기">
                 </div>
             </div>
 
             <div class="mb-3">
-                <input type="text" id="addr" name="addr" class="form-control" readonly placeholder="주소" maxlength="100">
+                <input type="text" id="address" name="address" class="form-control" readonly placeholder="주소" maxlength="100">
             </div>
 
             <div class="mb-3">
-                <input type="text" id="addrDetailAddress" name="addrDetail" class="form-control"
+                <input type="text" id="addressDetail" name="addressDetail" class="form-control"
                        placeholder="상세주소를 입력해 주세요" maxlength="100">
             </div>
 
             <div class="mb-3">
-                <input type="text" id="addrExtraAddress" name="addrExtraAddress" class="form-control" readonly
+                <input type="text" id="addressExtra" name="addressExtra" class="form-control" readonly
                        placeholder="비고">
             </div>
 
@@ -152,6 +152,9 @@
 
 <script>
 
+    // 회원 가입에 필요한 개별 자바스크립트 함수 시작
+
+    // 메시지 출력 로직 통합 함수
     function setResultMessage(element, message, isSuccess) {
         if (message) {
             element.textContent = message;
@@ -161,9 +164,6 @@
             clearResultMessage(element);
         }
     }
-
-    //회원 가입에 필요한 자바스크립트 함수 시작
-      //유효성 검사(loginId, password, nickname)
 
     // loginId를 확인하기 위한 함수
     function checkLoginId() {
@@ -419,7 +419,55 @@
             setResultMessage(phoneVerificationResult, error.message, false);
         });
     }
+
+    // 회원 가입에 필요한 개별 자바스크립트 함수 종료
+
+    // 회원 가입 전, 모든 필드가 유효한지 최종 확인 함수 시작
+    function validateFormBeforeSubmit() {
+        // name 입력 값 가져오기
+        const name = document.getElementById('name').value.trim();
+
+        // 결과를 저장하는 요소들 활용
+        const resultLoginId = document.getElementById('loginIdCheckResult').classList.contains('text-success');
+        const resultPassword = document.getElementById('passwordCheckResult').classList.contains('text-success');
+        const resultNickname = document.getElementById('nicknameCheckResult').classList.contains('text-success');
+        const resultPhone = document.getElementById('phoneVerificationResult').classList.contains('text-success');
+        const resultEmail = document.getElementById('emailCheckResult').classList.contains('text-success');
+
+        // name 입력 여부 확인
+        if (!name) {
+            alert("이름을 입력해 주세요.");
+            return false;
+        }
+
+        // 최종 검사 시작
+        if (!resultLoginId) {
+            alert("아이디 중복 확인을 해주세요.");
+            return false;
+        }
+        if (!resultPassword) {
+            alert("비밀번호를 확인해 주세요.");
+            return false;
+        }
+        if (!resultNickname) {
+            alert("닉네임 중복 확인을 해주세요.");
+            return false;
+        }
+        if (!resultPhone) {
+            alert("전화번호 인증을 완료해 주세요.");
+            return false;
+        }
+        if (!resultEmail) {
+            alert("이메일 중복 확인을 해주세요.");
+            return false;
+        }
+
+        // 모든 검사 통과
+        return true;
+    }
+
 </script>
+
 <!-- 다음 주소 검색 API 스크립트 -->
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script>
@@ -447,13 +495,13 @@
                     extraRoadAddr = ' (' + extraRoadAddr + ')';
                 }
                 // 우편번호와 주소 정보를 해당 필드에 넣는다.
-                document.getElementById('addrPostcode').value = data.zonecode;
-                document.getElementById("addr").value = roadAddr;
-                //document.getElementById("addr_jibunAddress").value = data.jibunAddress;
-                // jibsAddress 필드 사용하지 않으므로 주석 처리
+                document.getElementById('postcode').value = data.zonecode;
+                document.getElementById("address").value = roadAddr;
 
                 // 참고항목 문자열이 있을 경우 해당 필드에 넣는다.
-                document.getElementById("addrExtraAddress").value = extraRoadAddr || '';
+                document.getElementById("addressExtra").value = extraRoadAddr || '';
+
+                document.getElementById("addressDetail").focus();
             }
         }).open();
     }

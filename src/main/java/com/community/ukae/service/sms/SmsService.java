@@ -56,7 +56,7 @@ public class SmsService {
     public void sendSmsWithAuthCode(SmsRequestDTO smsRequest){
         String authCode = createAuthCode();
         long expirationTime = System.currentTimeMillis() + AUTH_CODE_EXPIRATION_TIME;
-        codeStorage.put(smsRequest.getTo(), authCode); // 번호와 생성된 인증코드 함께 저장 (HashMap)
+        codeStorage.put(smsRequest.getTo(), authCode);
         expiryStorage.put(smsRequest.getTo(), expirationTime);
 
         Message message = new Message();

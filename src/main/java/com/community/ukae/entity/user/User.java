@@ -27,8 +27,8 @@ public class User {
     @Column(insertable = false) // default: USER
     private String role;
     private String gender;
+    private String address;
     @Column(unique = true)
-    private String addr;
     private String email;
     @Column(updatable = false, insertable = false)
     private LocalDateTime createDate;
@@ -36,15 +36,5 @@ public class User {
 
     // JPA 기본 생성자
     public User() {}
-
-    // DTO → 엔티티 변환을 위한 생성자
-    public User(UserDTO userDto) {
-        this.loginId = userDto.getLoginId();
-        this.password = userDto.getPassword();
-        this.email = userDto.getEmail();
-        this.name = userDto.getName();
-        this.nickname = userDto.getNickname();
-        this.phone = userDto.getPhone();
-    }
 
 }
