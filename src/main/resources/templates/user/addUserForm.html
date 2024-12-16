@@ -151,6 +151,17 @@
 </div>
 
 <script>
+
+    function setResultMessage(element, message, isSuccess) {
+        if (message) {
+            element.textContent = message;
+            element.classList.remove("text-danger", "text-success");
+            element.classList.add(isSuccess ? "text-success" : "text-danger");
+        } else {
+            clearResultMessage(element);
+        }
+    }
+
     //회원 가입에 필요한 자바스크립트 함수 시작
       //유효성 검사(loginId, password, nickname)
 
@@ -161,15 +172,14 @@
 
     // loginId 입력 여부
     if(!loginId) {
-      resultLoginId.textContent = "";
+      setResultMessage(resultLoginId,"");
       alert("아이디를 입력하세요.");
       return;
     }
 
     // loginId 길이 유효성 검사
     if (loginId.length < 5 || loginId.length > 20) {
-      resultLoginId.textContent = "";
-      alert("아이디는 5자 이상 20자 이하여야 합니다.");
+      setResultMessage(resultLoginId,"아이디는 5자 이상 20자 이하여야 합니다.",false);
       return;
     }
 
@@ -184,13 +194,9 @@
       .then(response => response.json())
       .then(data => {
         if(data.isAvailableLoginId) {
-          resultLoginId.textContent = "사용 가능한 아이디입니다.";
-          resultLoginId.classList.remove("text-danger");
-          resultLoginId.classList.add("text-success");
+          setResultMessage(resultLoginId,"사용 가능한 아이디입니다.",true);
         } else {
-          resultLoginId.textContent= "이미 사용 중인 아이디입니다.";
-          resultLoginId.classList.remove("text-success");
-          resultLoginId.classList.add("text-danger");
+          setResultMessage(resultLoginId,"이미 사용 중인 아이디입니다.",false);
         }
       })
       .catch(error => {
@@ -209,23 +215,18 @@
       const passwordConfirm = document.getElementById('passwordConfirm').value;
       const resultPassword = document.getElementById('passwordCheckResult');
 
-      // 결과 메세지 함수
-      function setResultMessage(message, isSuccess) {
-        resultPassword.textContent = message;
-        resultPassword.classList.remove("text-danger", "text-success");
-        resultPassword.classList.add(isSuccess ? "text-success" : "text-danger");
-      }
 
       // 비밀번호 길이 유효성 검사
       if (password.length < 8 || password.length > 20) {
-        setResultMessage("비밀번호는 8자 이상 20자 이하여야 합니다.", false);
+        setResultMessage(resultPassword, "비밀번호는 8자 이상 20자 이하여야 합니다.", false);
         return;
       }
+
       // 비밀번호 일치 여부 확인
       if(password === passwordConfirm) {
-        setResultMessage("비밀번호가 일치합니다.", true);
+        setResultMessage(resultPassword, "비밀번호가 일치합니다.", true);
       } else {
-        setResultMessage("비밀번호가 일치하지 않습니다.", false);
+        setResultMessage(resultPassword, "비밀번호가 일치하지 않습니다.", false);
       }
     }
 
@@ -236,15 +237,14 @@
 
       // 닉네임 입력 여부
       if(!nickname) {
-        resultNickname.textContent = "";
+        setResultMessage(resultNickname, "", false);
         alert("별명을 입력하세요.");
         return;
       }
 
       // 닉네임 길이 유효성 검사
       if(nickname.length < 2 || nickname.length > 15) {
-        resultNickname.textContent = "";
-        alert("별명은 2자 이상 15자 이하여야 합니다.");
+        setResultMessage(resultNickname, "별명은 2자 이상 15자 이하여야 합니다.", false);
         return;
       }
 
@@ -259,13 +259,9 @@
         .then(response => response.json())
         .then(data => {
         if(data.isAvailableNickname){
-          resultNickname.textContent = "사용 가능한 닉네임입니다.";
-          resultNickname.classList.remove("text-danger");
-          resultNickname.classList.add("text-success");
+          setResultMessage(resultNickname, "사용 가능한 닉네임입니다.", true);
         } else {
-          resultNickname.textContent= "이미 사용 중인 닉네임입니다.";
-          resultNickname.classList.remove("text-success");
-          resultNickname.classList.add("text-danger");
+          setResultMessage(resultNickname, "이미 사용 중인 닉네임입니다.", false);
         }
       })
       .catch(error => {
@@ -286,19 +282,15 @@
 
       // 이메일 입력 여부 확인
       if (!emailId || !emailDomain) {
-        emailCheckResult.textContent = "이메일과 도메인을 모두 입력하세요.";
-        emailCheckResult.classList.add("text-danger");
-        emailCheckResult.classList.remove("text-success");
-        return false; // 유효성 검사 실패
+        setResultMessage(emailCheckResult, "이메일과 도메인을 모두 입력하세요.", false);
+        return;
       }
 
       // 도메인 유효성 검사
       const validDomains = ["gmail.com", "naver.com", "hanmail.net", "daum.net"];
       if (!validDomains.includes(emailDomain)) {
-        emailCheckResult.textContent = "유효하지 않은 도메인입니다.";
-        emailCheckResult.classList.add("text-danger");
-        emailCheckResult.classList.remove("text-success");
-        return false; // 유효성 검사 실패
+        setResultMessage(emailCheckResult, "유효하지 않은 도메인입니다.", false);
+        return;
       }
 
       // 이메일 합치고 서버에 보내 중복 검사
@@ -314,13 +306,9 @@
         .then(response => response.json())
         .then(data => {
           if (data.isAvailableEmail) {
-            emailCheckResult.textContent = "사용 가능한 이메일입니다.";
-            emailCheckResult.classList.add("text-success");
-            emailCheckResult.classList.remove("text-danger");
+            setResultMessage(emailCheckResult, "사용 가능한 이메일입니다.", true);
           } else {
-            emailCheckResult.textContent = "이미 가입된 이메일입니다.";
-            emailCheckResult.classList.add("text-danger");
-            emailCheckResult.classList.remove("text-success");
+            setResultMessage(emailCheckResult, "이미 가입된 이메일입니다.", false);
           }
         })
         .catch(error => {
@@ -337,11 +325,9 @@
       const emailDomain = document.getElementById('emailDomain').value.trim();
       const emailSendResult = document.getElementById('emailSendResult');
 
-      // 이메일 유효성 검사 통과했는지 확인
+      // 위의 이메일 유효성 검사 통과했는지 확인
       if (!checkEmail()) {
-        emailSendResult.textContent = "이메일 유효성 검사에 실패했습니다.";
-        emailSendResult.classList.add("text-danger");
-        emailSendResult.classList.remove("text-success");
+        setResultMessage(emailCheckResult, "이메일 유효성 검사에 실패했습니다.", false);
         return;
       }
 
@@ -373,20 +359,18 @@
         const toInput = document.getElementById('phone').value.trim();
         const phoneVerificationResult = document.getElementById('phoneVerificationResult');
 
-        phoneVerificationResult.classList.remove("text-success", "text-danger");
-
         // 핸드폰 번호 입력 여부
         if(!toInput) {
-            phoneVerificationResult.textContent = "";
+            setResultMessage(phoneVerificationResult, "");
             alert("인증 번호를 입력하세요.");
             return;
         }
+
         // 숫자만 추출하여 phoneNumber에 저장
         const phoneNumber = toInput.replace(/[^0-9]/g, "");
         // 유효성 검사
         if (phoneNumber.length < 10 || phoneNumber.length > 11) {
-            phoneVerificationResult.innerText = "유효한 전화번호 형식이 아닙니다. (예: 01012345678)";
-            phoneVerificationResult.classList.add("text-danger");
+            setResultMessage(phoneVerificationResult, "유효한 전화번호 형식이 아닙니다.(예: 01012345678)", false);
             return;
         }
         // 서버에 요청 보내기
@@ -401,24 +385,22 @@
         })
         .then(response => response.text())
         .then(data => {
-            phoneVerificationResult.innerText = "인증 코드가 전송되었습니다!";
-            phoneVerificationResult.classList.add("text-success");
+            setResultMessage(phoneVerificationResult, "인증 코드가 전송되었습니다!", true);
         })
         .catch(error => {
             console.error("Error:", error);
-            phoneVerificationResult.innerText = "인증 코드 전송에 실패했습니다.";
-            phoneVerificationResult.classList.add("text-danger");
-
+            setResultMessage(phoneVerificationResult, "인증 코드 전송에 실패했습니다.", false);
         });
     }
 
+    // 인증 번호 일치 확인 함수
     function checkAuthCode() {
         const toInput = document.getElementById("phone").value.trim();
         const authCodeInput = document.getElementById("authCode").value;
         const phoneVerificationResult = document.getElementById("phoneVerificationResult");
 
         if (!authCodeInput) {
-            phoneVerificationResult.textContent = "";
+            setResultMessage(phoneVerificationResult, "");
             alert("핸드폰 번호를 입력하세요.");
             return;
         }
@@ -426,26 +408,17 @@
             method: "POST"
         })
         .then(response => {
-            if (response.ok) {
-                return response.text();
-            } else {
-                throw new Error("인증에 실패했습니다.");
-            }
+            if (response.ok) return response.text();
+            else throw new Error("인증에 실패했습니다.");
         })
         .then(data => {
-            phoneVerificationResult.innerText = data; // 성공 메시지
-            phoneVerificationResult.classList.remove("text-danger");
-            phoneVerificationResult.classList.add("text-success");
+            setResultMessage(phoneVerificationResult, data, true);
         })
         .catch(error => {
             console.error("Error:", error);
-            phoneVerificationResult.innerText = error.message; // 실패 메시지
-            phoneVerificationResult.classList.remove("text-success");
-            phoneVerificationResult.classList.add("text-danger");
+            setResultMessage(phoneVerificationResult, error.message, false);
         });
     }
-
-
 </script>
 <!-- 다음 주소 검색 API 스크립트 -->
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
