@@ -80,14 +80,19 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                    <!-- 전화번호 입력 -->
                     <input type="tel" id="phone" name="phone" class="form-control" required maxlength="20"
-                           placeholder="전화번호를 입력하세요 (010-1234-5678)"
-                           pattern="^\d{3}-\d{3,4}-\d{4}$">
-                    <!-- 인증하기 버튼 -->
-                    <button type="button" class="btn btn-outline-dark" onclick="sendPhoneVerification()">인증 하기</button>
+                           placeholder="전화번호를 입력하세요.(01012345678)">
+                    <button type="button" class="btn btn-outline-dark" onclick="sendSmsAuthCode()">발송</button>
                 </div>
-                <div id="phoneVerificationResult" class="text-danger mt-2"></div> <!-- 전화번호 인증 결과 메시지 출력 -->
+            </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <input type="text" id="authCode" name="authCode" class="form-control" required maxlength="6"
+                           placeholder="인증 번호를 입력하세요 (6자리 숫자)">
+                    <button type="button" class="btn btn-outline-dark" onclick="checkAuthCode()">인증</button>
+                </div>
+                <!-- 결과 메시지 출력 -->
+                <div id="phoneVerificationResult" class="text-danger mt-2"></div>
             </div>
 
             <div class="mb-3">
@@ -130,7 +135,7 @@
                         <option value="daum.net">
                     </datalist>
                     <!-- 발송하기 버튼 -->
-                    <button type="button" class="btn btn-outline-dark" onclick="sendEmail()">발송 하기</button>
+                    <button type="button" class="btn btn-outline-dark" onclick="sendEmail()">발송</button>
                 </div>
                 <div id="emailCheckResult" class="mt-2"></div> <!-- 이메일 유효성 결과 출력 -->
                 <div id="emailVerifyResult" class="mt-2"></div> <!-- 이메일 발송 결과 출력 -->
@@ -361,6 +366,83 @@
         console.error('Error:', error);
         alert("잠시 후 다시 시도해주세요.");
       });
+    }
+
+    // 인증 번호를 포함한 메시지 발송 함수
+    function sendSmsAuthCode() {
+        const toInput = document.getElementById('phone').value.trim();
+        const phoneVerificationResult = document.getElementById('phoneVerificationResult');
+
+        phoneVerificationResult.classList.remove("text-success", "text-danger");
+
+        // 핸드폰 번호 입력 여부
+        if(!toInput) {
+            phoneVerificationResult.textContent = "";
+            alert("인증 번호를 입력하세요.");
+            return;
+        }
+        // 숫자만 추출하여 phoneNumber에 저장
+        const phoneNumber = toInput.replace(/[^0-9]/g, "");
+        // 유효성 검사
+        if (phoneNumber.length < 10 || phoneNumber.length > 11) {
+            phoneVerificationResult.innerText = "유효한 전화번호 형식이 아닙니다. (예: 01012345678)";
+            phoneVerificationResult.classList.add("text-danger");
+            return;
+        }
+        // 서버에 요청 보내기
+        fetch("/api/sms/sendSmsWithAuthCode", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                to: toInput
+            })
+        })
+        .then(response => response.text())
+        .then(data => {
+            phoneVerificationResult.innerText = "인증 코드가 전송되었습니다!";
+            phoneVerificationResult.classList.add("text-success");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            phoneVerificationResult.innerText = "인증 코드 전송에 실패했습니다.";
+            phoneVerificationResult.classList.add("text-danger");
+
+        });
+    }
+
+    function checkAuthCode() {
+        const toInput = document.getElementById("phone").value.trim();
+        const authCodeInput = document.getElementById("authCode").value;
+        const phoneVerificationResult = document.getElementById("phoneVerificationResult");
+
+        if (!authCodeInput) {
+            phoneVerificationResult.textContent = "";
+            alert("핸드폰 번호를 입력하세요.");
+            return;
+        }
+        fetch(`/api/sms/verifyAuthCode?to=${toInput}&authCode=${authCodeInput}`, {
+            method: "POST"
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            } else {
+                throw new Error("인증에 실패했습니다.");
+            }
+        })
+        .then(data => {
+            phoneVerificationResult.innerText = data; // 성공 메시지
+            phoneVerificationResult.classList.remove("text-danger");
+            phoneVerificationResult.classList.add("text-success");
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            phoneVerificationResult.innerText = error.message; // 실패 메시지
+            phoneVerificationResult.classList.remove("text-success");
+            phoneVerificationResult.classList.add("text-danger");
+        });
     }
 
 
