@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,7 @@
             <hr style="width: 100%; border: 1px solid #000;">
         </div>
 
-        <form id="addUserForm" action="/user/addUser" method="post" onsubmit="return validateFormBeforeSubmit()">
+        <form id="addUserForm" th:action="@{/user/addUser}" method="post" onsubmit="return prepareEmail() && validateFormBeforeSubmit()">
 
             <div class="mb-3">
                 <div class="input-group">
@@ -139,8 +139,9 @@
                 </div>
                 <div id="emailCheckResult" class="mt-2"></div> <!-- 이메일 유효성 결과 출력 -->
                 <div id="emailVerifyResult" class="mt-2"></div> <!-- 이메일 발송 결과 출력 -->
-
             </div>
+            <!--합친 이메일을 전송할 hidden input -->
+            <input type="hidden" id="email" name="email">
 
             <!-- 회원가입 버튼 -->
             <div class="d-flex justify-content-center mt-3">
@@ -354,6 +355,27 @@
       });
     }
 
+    // 이메일을 합쳐서 hidden input에 설정하는 함수
+    function prepareEmail() {
+        const emailId = document.getElementById('emailId').value.trim();
+        const emailDomain = document.getElementById('emailDomain').value.trim();
+
+        // 이메일 입력 여부 확인
+        if (!emailId || !emailDomain) {
+            alert("이메일을 정확히 입력해 주세요.");
+            return false; // 폼 제출 중단
+        }
+
+        // 이메일 합치기
+        const fullEmail = `${emailId}@${emailDomain}`;
+
+        // hidden input에 합친 이메일 값을 설정
+        document.getElementById('email').value = fullEmail;
+
+        return true;
+    }
+
+
     // 인증 번호를 포함한 메시지 발송 함수
     function sendSmsAuthCode() {
         const toInput = document.getElementById('phone').value.trim();
@@ -392,6 +414,8 @@
             setResultMessage(phoneVerificationResult, "인증 코드 전송에 실패했습니다.", false);
         });
     }
+
+
 
     // 인증 번호 일치 확인 함수
     function checkAuthCode() {

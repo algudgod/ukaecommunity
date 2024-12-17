@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>회원 가입 완료</title>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+</head>
+
+<body>
+<!-- 회원가입 완료 메시지 -->
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <h1 class="text-center mb-4">회원 가입 완료</h1>
+
+        <!-- 구분선 추가 -->
+        <div class="d-flex justify-content-center mb-4">
+            <hr style="width: 100%; border: 1px solid #000;">
+        </div>
+
+        <div class="card p-4">
+            <h3 class="text-center mb-3">환영합니다, <span th:text="${user.nickname}"></span> 님!</h3>
+            <p class="text-center">회원 가입이 성공적으로 완료되었습니다.</p>
+
+            <div class="d-flex justify-content-center mt-3">
+                <a href="/user/login" class="btn btn-outline-dark me-2">로그인</a>
+                <a href="/" class="btn btn-dark">홈으로 돌아가기</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

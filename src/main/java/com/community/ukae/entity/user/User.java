@@ -1,6 +1,5 @@
 package com.community.ukae.entity.user;
 
-import com.community.ukae.dto.user.UserDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
