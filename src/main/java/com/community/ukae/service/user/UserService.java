@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -47,5 +49,20 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+    // 회원 로그인
+    public User login(String loginId, String password) {
+
+        // 1. 아이디로 사용자 조회
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
+        // 2. 비밀번호 검증
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        // 3. 로그인 성공 시 사용자 반환
+        return user;
+    }
+
 
 }

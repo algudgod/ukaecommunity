@@ -4,6 +4,8 @@ import com.community.ukae.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
 
@@ -11,5 +13,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByLoginId(String loginId);
     boolean existsByNickname(String nickname);
     boolean existsByEmail(String email);
+
+    // 조회
+    Optional<User> findByLoginId(String loginId);
 
 }

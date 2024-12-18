@@ -59,4 +59,7 @@ class UserServiceTest {
         assertTrue(passwordEncoder.matches(rawPassword, encodedPassword)); // 비밀번호 매칭 확인
     }
 
+    @Test
+    void login() {
+    }
 }
