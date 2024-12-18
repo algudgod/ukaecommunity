@@ -21,7 +21,6 @@ public class User {
     private String name;
     @Column(unique = true)
     private String nickname;
-    @Column(unique = true)
     private String phone;
     @Column(insertable = false) // default: USER
     private String role;

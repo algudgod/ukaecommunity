@@ -4,6 +4,7 @@ import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder; // 비밀번호 암호화
 
     // 중복 여부 확인
     public boolean checkLoginId(String loginId) {
@@ -28,7 +30,10 @@ public class UserService {
 
         User user = new User();
         user.setLoginId(userRequest.getLoginId());
-        user.setPassword(userRequest.getPassword());
+
+        String encryptedPassword = passwordEncoder.encode(userRequest.getPassword());
+        user.setPassword(encryptedPassword);
+
         user.setName(userRequest.getName());
         user.setNickname(userRequest.getNickname());
         user.setEmail(userRequest.getEmail());
