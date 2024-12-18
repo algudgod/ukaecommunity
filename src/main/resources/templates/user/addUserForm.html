@@ -16,12 +16,22 @@
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <style>
+
+    /* 결과 메세지 글자 크기 */
+        .small-text {
+            font-size: 0.875rem;
+        }
+
+    </style>
+
+
 </head>
 
 <body>
 <!-- 회원가입 -->
 <div class="row justify-content-center mt-5">
-    <div class="col-md-6 col-lg-4"> <!-- row=12칸 시스템 화면 기준 레이아웃-->
+    <div class="col-md-8 col-lg-4">
         <h3 class="text-center mb-2">회원 가입</h3>
 
         <!-- 구분선 추가 -->
@@ -33,7 +43,12 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                    <input type="text" id="loginId" name="loginId" class="form-control" required maxlength="20"
+                    <label for="loginId"></label>
+                    <input type="text"
+                           id="loginId"
+                           name="loginId"
+                           class="form-control"
+                           required maxlength="20"
                            placeholder="아이디를 입력하세요">
                     <button type="button" class="btn btn-outline-dark" onclick="checkLoginId()">중복 확인</button>
                 </div>
@@ -42,8 +57,11 @@
 
             <div class="mb-3">
                 <div class="input-group">
-                    <input type="password" id="password" name="password" class="form-control" required maxlength="100"
-                           placeholder="비밀번호를 입력하세요">
+                    <label for="password"></label>
+                    <input type="password" id="password" name="password" class="form-control" required
+                           maxlength="100" placeholder="비밀번호를 입력하세요">
+
+                    <label for="passwordConfirm"></label>
                     <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" required
                            maxlength="100" placeholder="비밀번호 확인">
                 </div>
@@ -87,8 +105,11 @@
             </div>
             <div class="mb-3">
                 <div class="input-group">
-                    <input type="text" id="authCode" name="authCode" class="form-control" required maxlength="6"
-                           placeholder="인증 번호를 입력하세요 (6자리 숫자)">
+                    <!-- 인증 번호 입력 필드 -->
+                    <input type="text" id="authCode" name="authCode" class="form-control col-6" required maxlength="6"
+                           placeholder="인증 번호 (6자리 숫자)">
+                    <!-- 만료 시간 표시 영역 -->
+                    <span id="timerDisplay" class="input-group-text text-danger col-3 text-center"></span>
                     <button type="button" class="btn btn-outline-dark" onclick="checkAuthCode()">인증</button>
                 </div>
                 <!-- 결과 메시지 출력 -->
@@ -138,7 +159,7 @@
                     <button type="button" class="btn btn-outline-dark" onclick="sendEmail()">발송</button>
                 </div>
                 <div id="emailCheckResult" class="mt-2"></div> <!-- 이메일 유효성 결과 출력 -->
-                <div id="emailVerifyResult" class="mt-2"></div> <!-- 이메일 발송 결과 출력 -->
+
             </div>
             <!--합친 이메일을 전송할 hidden input -->
             <input type="hidden" id="email" name="email">
@@ -159,8 +180,8 @@
     function setResultMessage(element, message, isSuccess) {
         if (message) {
             element.textContent = message;
-            element.classList.remove("text-danger", "text-success");
-            element.classList.add(isSuccess ? "text-success" : "text-danger");
+            element.classList.remove("text-danger", "text-success", "small-text");
+            element.classList.add(isSuccess ? "text-success" : "text-danger", "small-text");
         } else {
             clearResultMessage(element);
         }
@@ -176,6 +197,13 @@
       setResultMessage(resultLoginId,"");
       alert("아이디를 입력하세요.");
       return;
+    }
+
+    // 정규식 검사 (맨 앞자리는 영어 소문자, 그 뒤는 소문자와 숫자만 허용)
+    const regex = /^[a-z][a-z0-9]*$/;
+    if (!regex.test(loginId)) {
+        setResultMessage(resultLoginId, "아이디는 영어 소문자로 시작하고, 숫자만 포함할 수 있습니다.", false);
+        return;
     }
 
     // loginId 길이 유효성 검사
@@ -220,6 +248,13 @@
       // 비밀번호 길이 유효성 검사
       if (password.length < 8 || password.length > 20) {
         setResultMessage(resultPassword, "비밀번호는 8자 이상 20자 이하여야 합니다.", false);
+        return;
+      }
+
+      // 정규식 검사
+      const regex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$/
+      if(!regex.test(password)){
+        setResultMessage(resultPassword, "비밀번호는 영문자와 특수문자를 반드시 포함해야 합니다.", false);
         return;
       }
 
@@ -363,7 +398,7 @@
         // 이메일 입력 여부 확인
         if (!emailId || !emailDomain) {
             alert("이메일을 정확히 입력해 주세요.");
-            return false; // 폼 제출 중단
+            return false;
         }
 
         // 이메일 합치기
@@ -380,6 +415,8 @@
     function sendSmsAuthCode() {
         const toInput = document.getElementById('phone').value.trim();
         const phoneVerificationResult = document.getElementById('phoneVerificationResult');
+        const timerDisplay = document.getElementById('timerDisplay'); // 타이머 표시 영역
+
 
         // 핸드폰 번호 입력 여부
         if(!toInput) {
@@ -405,17 +442,37 @@
                 to: toInput
             })
         })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-            setResultMessage(phoneVerificationResult, "인증 코드가 전송되었습니다!", true);
+            console.log("서버 응답:", data); // 서버 응답 확인
+            const remainingTime = Math.floor(data.expirationTime / 1000); // 밀리초 → 초 변환
+            startTimer(timerDisplay, remainingTime); // 타이머 시작
+            setResultMessage(phoneVerificationResult, "인증 번호가 전송되었습니다!", true);
         })
         .catch(error => {
             console.error("Error:", error);
-            setResultMessage(phoneVerificationResult, "인증 코드 전송에 실패했습니다.", false);
+            setResultMessage(phoneVerificationResult, "인증 번호 전송에 실패했습니다.", false);
         });
     }
 
+    // 타이머 시작 함수
+    function startTimer(timerDisplay, remainingTime) {
+        // 타이머 초기화
+        remainingTime = Math.floor(remainingTime);
+        const interval = setInterval(() => {
+            if (remainingTime <= 0) {
+                clearInterval(interval);
+                timerDisplay.innerText = "시간 초과";
+                return;
+            }
+        // 남은 시간 계산
+        const minutes = ('0' + Math.floor(remainingTime / 60)).slice(-2);
+        const seconds = ('0' + (remainingTime % 60)).slice(-2);
 
+        timerDisplay.innerText = `${minutes} : ${seconds}`;
+        remainingTime--;
+        }, 1000);
+    }
 
     // 인증 번호 일치 확인 함수
     function checkAuthCode() {
@@ -530,6 +587,7 @@
         }).open();
     }
 </script>
+
 
 </body>
 </html>

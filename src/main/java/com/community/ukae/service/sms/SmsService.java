@@ -30,6 +30,9 @@ public class SmsService {
         this.fromNumber = fromNumber; // 환경 변수에서 가져온 발신 번호
     }
 
+    public long getAuthCodeExpirationTime() {
+        return AUTH_CODE_EXPIRATION_TIME;
+    }
 
     // 일반 단일 메세지 발송
     public void sendSms(SmsRequestDTO smsRequest) {

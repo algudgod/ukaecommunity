@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("api/sms")
 @RequiredArgsConstructor
@@ -22,9 +24,13 @@ public class SmsRestController {
 
     // 인증번호를 포함한 단일 메세지 발송
     @PostMapping("sendSmsWithAuthCode")
-    public ResponseEntity<String> sendSmsWithAuthCode(@RequestBody SmsRequestDTO smsRequest) {
+    public ResponseEntity<?> sendSmsWithAuthCode(@RequestBody SmsRequestDTO smsRequest) {
+
         smsService.sendSmsWithAuthCode(smsRequest);
-        return ResponseEntity.ok("인증 코드가 전송되었습니다.");
+        long expirationTime = smsService.getAuthCodeExpirationTime();
+
+        return ResponseEntity.ok().body(Map.of("message","인증 번호가 전송되었습니다.",
+                                                "expirationTime", expirationTime));
     }
 
     // 인증번호 검증
