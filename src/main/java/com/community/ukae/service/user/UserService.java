@@ -60,7 +60,11 @@ public class UserService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        // 3. 로그인 성공 시 사용자 반환
+        // 3. 아이디 사용 여부 검증
+        if ("N".equals(user.getUseYn())) {
+            throw new IllegalArgumentException("비활성화된 계정입니다. 관리자에게 문의하세요.");
+        }
+        // 4. 로그인 성공 시 사용자 반환
         return user;
     }
 

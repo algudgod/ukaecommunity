@@ -3,6 +3,7 @@ package com.community.ukae.controller.user;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.service.user.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
@@ -29,20 +30,22 @@ public class UserController {
         model.addAttribute("user",userRequest); // 환영 메세지에 필요한 필드
         return "user/addUser";
     }
-
+    // 사용자 로그인 form
     @GetMapping("login")
     public String login(){
         return "user/login";
     }
 
+    // 사용자 로그인
     @PostMapping("login")
     public String login(@RequestParam String loginId,
-                        @RequestParam String password, Model model) {
+                        @RequestParam String password, HttpSession session, Model model) {
 
         try {
             User user = userService.login(loginId, password);
-            return "redirect:/";
 
+            session.setAttribute("user", user);
+            return "redirect:/";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "user/login";
