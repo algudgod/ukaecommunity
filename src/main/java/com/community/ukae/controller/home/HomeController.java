@@ -19,12 +19,8 @@ public class HomeController {
     public String home(HttpSession session, Model model) {
 
         User user = (User)session.getAttribute("user");
-
         if (user != null) {
             model.addAttribute("user", user);
-            System.out.println("로그인된 사용자: " + user.getNickname());
-        } else {
-            System.out.println("세션에 사용자 정보가 없습니다.");
         }
 
         return "home";

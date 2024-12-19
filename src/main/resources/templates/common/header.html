@@ -2,12 +2,10 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Header</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 
-    <style>
 
-    </style>
 </head>
 
 <body>
@@ -26,16 +24,30 @@
 
     <!-- 네비게이션 바 영역 -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
         <div class="container px-5" th:style="'height: 25px;'">
             <a class="navbar-brand" th:href="@{/}" th:style="'font-size: 1.1em;'">♡ 유쾌 커뮤니티 ♡</a>
+
             <div class="navbar-collapse">
+
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0" th:if="${user == null}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/user/login}">로그인</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/user/addUserForm}">회원가입</a></li>
                 </ul>
+
+                <!-- 닉네임/로그아웃 메뉴 -->
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0" th:if="${user != null}">
-                    <!-- 닉네임/로그아웃 메뉴 -->
-                    <li class="nav-item"><a class="nav-link" th:href="@{/user/profile}" th:text="${user.nickname}"></a></li>
+                    <li class=" nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" th:href="@{/user/profile}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-hearts"></i>
+                            <span th:text="${user.nickname}"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">내 활동 알림</a></li>
+                            <li><a class="dropdown-item" href="#">내 정보 보기</a></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/user/logout}">로그아웃</a></li>
                 </ul>
 
