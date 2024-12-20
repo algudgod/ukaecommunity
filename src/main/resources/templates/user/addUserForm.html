@@ -4,12 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>회원 가입</title>
-    <!-- Custom CSS -->
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
 
     <style>
 
@@ -26,7 +27,7 @@
 <!-- 회원가입 -->
 <div class="row justify-content-center mt-5">
     <div class="col-md-8 col-lg-4">
-        <h3 class="text-center mb-2">회원 가입</h3>
+        <h2 class="text-center mb-2">회원 가입</h2>
 
         <!-- 구분선 추가 -->
         <div class="d-flex justify-content-center">
@@ -164,7 +165,7 @@
 
             <!-- 회원가입 버튼 -->
             <div class="d-flex justify-content-center">
-                <a href="/" class="btn btn-outline-dark w-100 me-3">뒤로</a>
+                <a th:href="@{/}" class="btn btn-outline-dark w-100 me-3">뒤로</a>
                 <button type="submit" class="btn btn-dark w-100">회원 가입</button>
             </div>
         </form>
@@ -358,7 +359,7 @@
     function sendEmail() {
       const emailId = document.getElementById('emailId').value.trim();
       const emailDomain = document.getElementById('emailDomain').value.trim();
-      const emailSendResult = document.getElementById('emailSendResult');
+      const emailCheckResult = document.getElementById('emailCheckResult');
 
       // 위의 이메일 유효성 검사 통과했는지 확인
       if (!checkEmail()) {

@@ -58,5 +58,16 @@ public class UserController {
         return "redirect:/";
     }
 
+    // 사용자 조회
+    @GetMapping("userInfo")
+    public String getUserInfo(HttpSession session, Model model){
+
+        User user = (User) session.getAttribute("user");
+        if(user == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", user);
+        return "user/userInfo";
+    }
 
 }
