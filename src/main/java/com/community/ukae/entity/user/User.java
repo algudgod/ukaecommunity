@@ -35,4 +35,10 @@ public class User {
     // JPA 기본 생성자
     public User() {}
 
+    public String getFormattedPhone() {
+        if (phone == null || phone.length() < 10) {
+            return phone; // null이거나 유효하지 않은 번호 그대로 반환
+        }
+        return phone.replaceAll("(\\d{3})(\\d{3,4})(\\d{4})", "$1-$2-$3");
+    }
 }

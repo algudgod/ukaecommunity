@@ -4,6 +4,7 @@ import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
@@ -17,26 +18,27 @@ public class UserController {
 
     private final UserService userService;
 
-    // 사용자 등록 form
+    // 회원 등록 form
     @GetMapping("addUserForm")
     public String addUserForm() {
         return "user/addUserForm";
     }
 
-    // 사용자 등록
+    // 회원 등록
     @PostMapping("addUser")
-    public String addUser(UserRequestDTO userRequest, Model model){
+    public String addUser(UserRequestDTO userRequest, Model model) {
         userService.addUser(userRequest);
-        model.addAttribute("user",userRequest); // 환영 메세지에 필요한 필드
+        model.addAttribute("user", userRequest); // 환영 메세지에 필요한 필드
         return "user/addUser";
     }
-    // 사용자 로그인 form
+
+    // 회원 로그인 form
     @GetMapping("login")
-    public String login(){
+    public String login() {
         return "user/login";
     }
 
-    // 사용자 로그인
+    // 회원 로그인
     @PostMapping("login")
     public String login(@RequestParam String loginId,
                         @RequestParam String password, HttpSession session, Model model) {
@@ -58,16 +60,41 @@ public class UserController {
         return "redirect:/";
     }
 
-    // 사용자 조회
+    // 회원 정보 조회
     @GetMapping("userInfo")
-    public String getUserInfo(HttpSession session, Model model){
+    public String getUserInfo(HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("user");
-        if(user == null) {
+        if (user == null) {
             return "redirect:/user/login";
         }
         model.addAttribute("user", user);
         return "user/userInfo";
     }
 
+    // 회원 정보 수정 form
+    @GetMapping("editUserForm")
+    public String editUserInfo(HttpSession session, Model model) {
+
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", user);
+        return "user/editUserForm";
+    }
+
+    // 회원 정보
+    @PostMapping("updateUserInfo")
+    public String updateUserInfo(@ModelAttribute UserRequestDTO userRequest,
+                                 @RequestParam String addressDetail,
+                                 HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        userService.updateUserInfo(user, userRequest, addressDetail);
+        return "redirect:/user/userInfo";
+    }
 }
+

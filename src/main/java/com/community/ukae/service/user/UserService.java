@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -68,5 +67,17 @@ public class UserService {
         return user;
     }
 
+    // 회원 정보 수정
+    public void updateUserInfo(User user, UserRequestDTO userRequest, String addressDetail) {
+
+        user.setNickname(userRequest.getNickname());
+        user.setPhone(userRequest.getPhone());
+        user.setEmail(userRequest.getEmail());
+        String fullAddress = userRequest.getAddress() + " " + addressDetail;
+        user.setAddress(fullAddress);
+
+        // 데이터 저장
+        userRepository.save(user);
+    }
 
 }
