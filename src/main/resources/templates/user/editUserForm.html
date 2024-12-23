@@ -22,7 +22,7 @@
         <div class="col-md-6 col-lg-5">
             <h2 class="text-center mb-2 fw-bold">정보 수정</h2>
 
-            <!-- 구분선 추가 -->
+            <!-- 구분선 -->
             <div class="d-flex justify-content-center">
                 <hr style="width: 100%; border: 1px solid #ccc;">
             </div>
@@ -36,8 +36,32 @@
                         <div class="mb-3 row">
                             <label for="nickname" class="col-4 col-form-label text-end"><strong>닉네임:</strong></label>
                             <div class="col-8">
-                                <input type="text" id="nickname" name="nickname" class="form-control"
-                                       th:value="${user.nickname}" required>
+                                <div class="input-group">
+                                    <input type="text" id="nickname" name="nickname" class="form-control"
+                                           th:value="${user.nickname}" required maxlength="20" placeholder="닉네임을 입력하세요">
+                                    <button type="button" class="btn btn-outline-dark" onclick="checkNickname()">중복 확인
+                                    </button>
+                                </div>
+                                <div id="nicknameCheckResult" class="text-danger mt-2"></div> <!-- 확인 결과 출력 -->
+                            </div>
+                        </div>
+
+                        <!-- 성별 -->
+                        <div class="mb-3 row">
+                            <label class="col-4 col-form-label text-end"><strong>성별:</strong></label>
+                            <div class="col-8 d-flex align-items-center">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="gender_male" name="gender"
+                                           value="M"
+                                           th:checked="${user.gender == 'M'}" required>
+                                    <label class="form-check-label" for="gender_male">남성</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" id="gender_female" name="gender"
+                                           value="F"
+                                           th:checked="${user.gender == 'F'}" required>
+                                    <label class="form-check-label" for="gender_female">여성</label>
+                                </div>
                             </div>
                         </div>
 
@@ -47,15 +71,8 @@
                             <div class="col-8">
                                 <input type="tel" id="phone" name="phone" class="form-control" th:value="${user.phone}"
                                        required>
-                            </div>
-                        </div>
+                                <div id="phoneCheckResult" class="text-danger mt-2"></div> <!-- 확인 결과 출력 -->
 
-                        <!-- 이메일 -->
-                        <div class="mb-3 row">
-                            <label for="email" class="col-4 col-form-label text-end"><strong>이메일:</strong></label>
-                            <div class="col-8">
-                                <input type="email" id="email" name="email" class="form-control"
-                                       th:value="${user.email}" required>
                             </div>
                         </div>
 
@@ -82,8 +99,12 @@
                             </div>
                         </div>
 
+                        <!-- 구분선 -->
+                        <div class="d-flex justify-content-center">
+                            <hr style="width: 100%; border: 1px solid #ccc;">
+                        </div>
                         <!-- 저장/취소 버튼 -->
-                        <div class="d-flex justify-content-between gap-3 mt-4">
+                        <div class="d-flex justify-content-between gap-3 mt-1">
                             <a th:href="@{/user/userInfo}" class="btn btn-outline-dark w-50">뒤로</a>
                             <button type="submit" class="btn btn-dark w-50">저장</button>
                         </div>
@@ -136,6 +157,63 @@
             }
         }).open();
     }
+
+</script>
+
+<script>
+
+    // 메시지 출력 로직 통합 함수
+    function setResultMessage(element, message, isSuccess) {
+        if (message) {
+            element.textContent = message;
+            element.classList.remove("text-danger", "text-success", "small-text");
+            element.classList.add(isSuccess ? "text-success" : "text-danger", "small-text");
+        } else {
+            clearResultMessage(element);
+        }
+    }
+
+    function clearResultMessage(element) {
+        element.textContent = "";
+        element.classList.remove("text-danger", "text-success", "small-text");
+    }
+
+    function checkNickname() {
+      const nickname = document.getElementById('nickname').value;
+      const resultNickname = document.getElementById('nicknameCheckResult');
+
+      // 닉네임 입력 여부
+      if(!nickname) {
+        setResultMessage(resultNickname, "", false);
+        alert("별명을 입력하세요.");
+        return;
+      }
+          // 닉네임 길이 유효성 검사
+      if(nickname.length < 2 || nickname.length > 15) {
+        setResultMessage(resultNickname, "별명은 2자 이상 15자 이하여야 합니다.", false);
+        return;
+      }
+      //서버에 닉네임 중복 확인 요청
+      fetch('/api/user/checkNickname', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({nickname: nickname})
+      })
+        .then(response => response.json())
+        .then(data => {
+        if(data.isAvailableNickname){
+          setResultMessage(resultNickname, "사용 가능한 닉네임입니다.", true);
+        } else {
+          setResultMessage(resultNickname, "이미 사용 중인 닉네임입니다.", false);
+        }
+      })
+      .catch(error => {
+        console.error('Error:',error);
+        alert("잠시 후 다시 시도해 주세요.");
+        });
+      }
 
 </script>
 </body>

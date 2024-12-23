@@ -1,14 +1,15 @@
 package com.community.ukae.controller.user;
 
 import com.community.ukae.dto.user.UserRequestDTO;
+import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -84,17 +85,31 @@ public class UserController {
         return "user/editUserForm";
     }
 
-    // 회원 정보
+    // 회원 정보 수정
     @PostMapping("updateUserInfo")
-    public String updateUserInfo(@ModelAttribute UserRequestDTO userRequest,
+    public String updateUserInfo(@ModelAttribute UserUpdateDTO userUpdate,
                                  @RequestParam String addressDetail,
                                  HttpSession session) {
+
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/user/login";
         }
-        userService.updateUserInfo(user, userRequest, addressDetail);
+        userService.updateUserInfo(user, userUpdate, addressDetail);
         return "redirect:/user/userInfo";
+    }
+
+    // 회원 정보 사용여부 변경 (탈퇴)
+    @PostMapping("deleteUser")
+    public String deleteUser(HttpSession session){
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        userService.deleteUser(user.getLoginId());
+        session.invalidate();
+
+        return "redirect:/";
     }
 }
 

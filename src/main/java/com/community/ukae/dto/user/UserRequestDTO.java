@@ -25,7 +25,7 @@ public class UserRequestDTO {
     @Pattern(regexp = "^01[0-9]{8,9}$", message = "유효한 전화번호를 입력하세요.")
     @NotBlank(message = "핸드폰 번호는 필수 입력 값입니다.")
     private String phone;
-
+    @NotBlank(message = "성별은 필수 입력 값입니다.")
     private String gender;
 
     private String postcode;

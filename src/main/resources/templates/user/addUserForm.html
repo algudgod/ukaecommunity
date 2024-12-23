@@ -187,6 +187,11 @@
         }
     }
 
+    function clearResultMessage(element) {
+        element.textContent = "";
+        element.classList.remove("text-danger", "text-success", "small-text");
+    }
+
     // loginId를 확인하기 위한 함수
     function checkLoginId() {
       const loginId = document.getElementById('loginId').value;
