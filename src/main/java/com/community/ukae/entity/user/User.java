@@ -31,6 +31,7 @@ public class User {
     @Column(updatable = false, insertable = false)
     private LocalDateTime createDate;
     private LocalDateTime withdrawDate;
+    private String profileUrl;
 
     // JPA 기본 생성자
     public User() {}

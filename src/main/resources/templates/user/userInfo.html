@@ -30,6 +30,30 @@
             <div class="card mx-auto rounded" style="width: 100%; max-width: 500px;">
                 <div class="card-body">
 
+                    <!-- 프로필 사진 -->
+                    <div class="d-flex justify-content-center mt-1 mb-2">
+                        <div class="position-relative">
+                            <img id="profileImagePreview"
+                                 th:src="${user.profileUrl}"
+                                 alt="프로필 사진" class="rounded-circle"
+                                 style="width: 130px; height: 130px; border: 1px solid #ccc;">
+
+                            <!-- 연필 버튼 -->
+                            <button id="editProfileButton"
+                                    class="btn btn-light position-absolute bottom-0 end-0"
+                                    style="border: 1px solid #ccc; padding: 5px; border-radius: 50%;">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <input type="file" id="profileImageInput" name="file" accept="image/*"
+                                   style="display: none;" onchange="previewProfileImage(event); uploadProfileImage(event);">
+                        </div>
+                    </div>
+
+                    <!-- 구분선 -->
+                    <div class="d-flex justify-content-center">
+                        <hr style="width: 100%; border: 1px solid #ccc;">
+                    </div>
+
                     <!-- 닉네임 -->
                     <div class="mb-3 row">
                         <label class="col-4 col-form-label text-end"><strong>닉네임:</strong></label>
@@ -74,7 +98,7 @@
                 <!-- 탈퇴하기 -->
                 <div class="right-align-form pe-2" style="text-align: right;">
                     <form th:action="@{/user/deleteUser}" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
-                        <button type="submit" class="btn btn-link" style="color: gray;">탈퇴하기</button>
+                        <button type="submit" class="btn btn-link" style="color: gray; font-size: 0.9rem;">탈퇴하기</button>
                     </form>
                 </div>
 
@@ -94,5 +118,53 @@
     </div>
 </div>
 
+
+<script>
+
+    // 회원 프로필 사진 옆 연필 버튼 클릭 시, file 업로드 창 띄움
+    document.getElementById('editProfileButton').addEventListener('click', function () {
+        document.getElementById('profileImageInput').click();
+    });
+
+    function previewProfileImage(event) {
+        const file = event.target.files[0]; // 선택된 파일
+        if (file) {
+            const reader = new FileReader(); // FileReader 객체 생성
+            reader.onload = function(e) {
+                const previewImage = document.getElementById('profileImagePreview');
+                previewImage.src = e.target.result; // 미리보기 이미지 업데이트
+            };
+            reader.readAsDataURL(file); // 파일 내용을 읽고 Base64 데이터 URL 생성
+        }
+    }
+
+function uploadProfileImage(event) {
+    const file = event.target.files[0]; // 선택된 파일
+    if (file) {
+        const formData = new FormData();
+        formData.append("file", file); // 서버에 보낼 파일
+
+        fetch('/api/s3/profileUpload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text(); // 업로드된 URL 반환
+            } else {
+                throw new Error("업로드 실패");
+            }
+        })
+        .then(fileUrl => {
+            console.log("Returned fileUrl:", fileUrl); // 서버에서 반환된 URL 출력
+            alert("프로필 사진이 성공적으로 업로드되었습니다!");
+        })
+        .catch(error => {
+            console.error("업로드 에러: ", error);
+            alert("업로드 중 문제가 발생했습니다.");
+        });
+    }
+}
+</script>
 </body>
 </html>
