@@ -32,7 +32,7 @@
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0" th:if="${user == null}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/user/login}">로그인</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/user/addUserForm}">회원가입</a></li>
+                    <li class="nav-item"><a  href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#signupModal">회원가입</a></li>
                 </ul>
 
                 <!-- 닉네임/로그아웃 메뉴 -->
@@ -55,7 +55,45 @@
         </div>
     </nav>
 
+    <!-- 회원가입 모달 -->
+    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="signupModalLabel">회원가입</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="d-flex flex-column align-items-center gap-3">
+                        <!-- 일반 회원가입 -->
+                        <a th:href="@{/user/addUserForm}"
+                           class="btn btn-dark d-flex align-items-center justify-content-center"
+                           style="width: 60%; height: 40px; font-size: 14px;">
+                            일반 회원가입
+                        </a>
+                        <!-- 카카오로 가입 -->
+                        <a th:href="@{/login/kakao}"
+                           class="btn btn-warning d-flex align-items-center justify-content-center"
+                           style="width: 60%; height: 40px; font-size: 14px;">
+                            <img src="/images/kakaotalk.png" alt="카카오 아이콘"
+                                 style="width: 25px; height: 25px; margin-right: 8px;">
+                            카카오로 가입
+                        </a>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </header>
+
+
 
 </body>
 </html>
