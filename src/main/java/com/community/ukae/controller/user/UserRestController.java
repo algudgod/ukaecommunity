@@ -39,5 +39,41 @@ public class UserRestController {
         return ResponseEntity.ok(Map.of("isAvailableEmail",isAvailableEmail));
     }
 
+    @PostMapping("findUserId")
+    public ResponseEntity<String> findUserId(@RequestBody Map<String,String> request){
+
+        String name = request.get("name");
+        String email = request.get("email");
+
+        if (name == null || email == null) {
+            return ResponseEntity.badRequest().body("이름과 이메일을 모두 입력해주세요.");
+        }
+
+        try {
+            String maskedUserId = userService.findUserIdByNameAndEmail(name, email);
+            return ResponseEntity.ok(maskedUserId); // 성공 시 마스킹된 아이디 반환
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("이름과 이메일이 일치하지 않습니다.");
+        }
+    }
+
+    @PostMapping("findUserPassword")
+    public ResponseEntity<String> findUserPassword(@RequestBody Map<String,String> request){
+        String loginId = request.get("loginId");
+        String email = request.get("email");
+
+        if (loginId == null || email == null) {
+            return ResponseEntity.badRequest().body("아이디와 이메일을 모두 입력해주세요.");
+        }
+        try {
+            String maskedUserPassword = userService.findUserPasswordByLoginIdAndEmail(loginId, email);
+            return ResponseEntity.ok(maskedUserPassword); // 성공 시 마스킹된 아이디 반환
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("아이디와 이메일이 일치하지 않습니다.");
+        }
+    }
+
+
+
 
 }

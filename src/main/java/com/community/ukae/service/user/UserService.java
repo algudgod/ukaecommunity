@@ -95,7 +95,36 @@ public class UserService {
         user.setUseYn("N");
         user.setWithdrawDate(LocalDateTime.now());
         userRepository.save(user);
+    }
 
+    // 회원 아이디 찾기
+    public String findUserIdByNameAndEmail(String name, String email){
 
+       User user = userRepository.findByNameAndEmail(name, email)
+               .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
+
+       return maskUserId(user.getLoginId());
+    }
+    private String maskUserId(String userId) {
+
+        int visibleLength = userId.length() - 4;
+        return userId.substring(0, visibleLength) + "****"; // 앞부분 + 뒤쪽 4자리 마스킹
+    }
+
+    // 회원 비밀번호 찾기
+    public String findUserPasswordByLoginIdAndEmail(String loginId, String email) {
+        // 로그인 아이디와 이메일로 사용자 조회
+        User user = userRepository.findByLoginIdAndEmail(loginId, email)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
+
+        // 비밀번호 마스킹 처리 후 반환
+        return maskUserPassword(user.getPassword());
+    }
+
+    // 비밀번호 마스킹 처리
+    private String maskUserPassword(String userPassword) {
+
+        int visibleLength = userPassword.length() -4;
+        return userPassword.substring(0, visibleLength) + "****";
     }
 }
