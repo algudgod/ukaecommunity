@@ -33,4 +33,7 @@ public class UserRequestDTO {
     private String addressDetail;
     private String addressExtra;
 
+    // 카카오 로그인에 필요한 액세스 토큰 필드 추가
+    private String accessToken;
+
 }

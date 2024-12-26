@@ -1,0 +1,353 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>회원 가입</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+  <style>
+
+    /* 결과 메세지 글자 크기 */
+        .small-text {
+            font-size: 0.875rem;
+        }
+
+  </style>
+
+</head>
+
+<body>
+<!-- 회원가입 -->
+<div class="row justify-content-center mt-5">
+  <div class="col-md-8 col-lg-4">
+    <h2 class="text-center mb-2">회원 가입</h2>
+
+    <!-- 구분선 추가 -->
+    <div class="d-flex justify-content-center">
+      <hr style="width: 100%; border: 1px solid #ccc;">
+    </div>
+
+    <form id="addKakaoUserForm" th:action="@{/user/addUser}" method="post" onsubmit="validateFormBeforeSubmit()">
+
+      <!-- 카카오 정보 (readonly 처리) -->
+      <div class="row mb-3">
+        <!-- 이름 -->
+        <div class="col-md-6">
+          <input type="text" id="name" name="name" class="form-control" th:value="${name}" readonly>
+        </div>
+
+        <!-- 성별 -->
+        <div class="col-md-6">
+          <input type="text" id="phone" name="phone" class="form-control" th:value="${phone}" readonly>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <input type="email" id="email" name="email" class="form-control" th:value="${email}" readonly>
+      </div>
+
+      <!-- 추가 입력 필드 -->
+      <div class="mb-3">
+        <div class="input-group">
+          <label for="loginId"></label>
+          <input type="text"
+                 id="loginId"
+                 name="loginId"
+                 class="form-control"
+                 required maxlength="20"
+                 placeholder="아이디를 입력하세요">
+          <button type="button" class="btn btn-outline-dark" onclick="checkLoginId()">중복 확인</button>
+        </div>
+        <div id="loginIdCheckResult" class="mt-2"></div> <!-- 아이디 중복 확인 내용 출력 -->
+      </div>
+
+      <!-- 성별 입력 -->
+      <div class="mb-3">
+        <div class="d-flex gap-3 align-items-center">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="gender_male" name="gender" value="M"
+                   th:checked="${gender == 'male'}">
+            <label class="form-check-label" for="gender_male">남</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="gender_female" name="gender" value="F"
+                   th:checked="${gender == 'female'}">
+            <label class="form-check-label" for="gender_female">여</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div class="input-group">
+          <label for="password"></label>
+          <input type="password" id="password" name="password" class="form-control" required
+                 maxlength="100" placeholder="비밀번호를 입력하세요">
+
+          <label for="passwordConfirm"></label>
+          <input type="password" id="passwordConfirm" name="passwordConfirm" class="form-control" required
+                 maxlength="100" placeholder="비밀번호 확인">
+        </div>
+        <div id="passwordCheckResult" class="mt-2"></div> <!-- 비밀번호 일치 여부 내용 출력 -->
+      </div>
+
+
+      <div class="mb-3">
+        <div class="input-group">
+          <input type="text" id="nickname" name="nickname" class="form-control" required maxlength="20"
+                 placeholder="닉네임을 입력하세요">
+          <button type="button" class="btn btn-outline-dark" onclick="checkNickname()">중복 확인</button>
+        </div>
+        <div id="nicknameCheckResult" class="mt-2"></div> <!-- 닉네임 중복 확인 결과 출력 -->
+      </div>
+
+
+      <div class="mb-3">
+        <div class="input-group">
+          <input type="text" id="postcode" name="postcode" class="form-control" readonly
+                 placeholder="우편번호">
+          <input type="button" class="btn btn-outline-dark" onclick="daumPostcode()" value="주소 찾기">
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <input type="text" id="address" name="address" class="form-control" readonly placeholder="주소" maxlength="100">
+      </div>
+
+      <div class="mb-3">
+        <input type="text" id="addressDetail" name="addressDetail" class="form-control"
+               placeholder="상세주소를 입력해 주세요" maxlength="100">
+      </div>
+
+      <div class="mb-3">
+        <input type="text" id="addressExtra" name="addressExtra" class="form-control" readonly
+               placeholder="비고">
+      </div>
+
+      <!-- 구분선 추가 -->
+      <div class="d-flex justify-content-center">
+        <hr style="width: 100%; border: 1px solid #ccc;">
+      </div>
+
+      <!-- 회원가입 버튼 -->
+      <div class="d-flex justify-content-center">
+        <a th:href="@{/}" class="btn btn-outline-dark w-100 me-3">뒤로</a>
+        <button type="submit" class="btn btn-dark w-100">회원 가입</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+
+  // 메시지 출력 로직 통합 함수
+  function setResultMessage(element, message, isSuccess) {
+      if (message) {
+          element.textContent = message;
+          element.classList.remove("text-danger", "text-success", "small-text");
+          element.classList.add(isSuccess ? "text-success" : "text-danger", "small-text");
+      } else {
+          clearResultMessage(element);
+      }
+  }
+
+  function clearResultMessage(element) {
+      element.textContent = "";
+      element.classList.remove("text-danger", "text-success", "small-text");
+  }
+
+  // loginId를 확인하기 위한 함수
+  function checkLoginId() {
+    const loginId = document.getElementById('loginId').value;
+    const resultLoginId = document.getElementById('loginIdCheckResult');
+
+  // loginId 입력 여부
+  if(!loginId) {
+    setResultMessage(resultLoginId,"");
+    alert("아이디를 입력하세요.");
+    return;
+  }
+
+  // 정규식 검사 (맨 앞자리는 영어 소문자, 그 뒤는 소문자와 숫자만 허용)
+  const regex = /^[a-z][a-z0-9]*$/;
+  if (!regex.test(loginId)) {
+      setResultMessage(resultLoginId, "아이디는 영어 소문자로 시작하고, 숫자만 포함할 수 있습니다.", false);
+      return;
+  }
+
+  // loginId 길이 유효성 검사
+  if (loginId.length < 5 || loginId.length > 20) {
+    setResultMessage(resultLoginId,"아이디는 5자 이상 20자 이하여야 합니다.",false);
+    return;
+  }
+
+  // 서버에 아이디 중복 확인 요청
+  fetch('/api/user/checkLoginId', {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({loginId: loginId})
+  })
+    .then(response => response.json())
+    .then(data => {
+      if(data.isAvailableLoginId) {
+        setResultMessage(resultLoginId,"사용 가능한 아이디입니다.",true);
+      } else {
+        setResultMessage(resultLoginId,"이미 사용 중인 아이디입니다.",false);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert("잠시 후 다시 시도해 주세요.");
+    });
+  }
+
+  // password를 확인하기 위한 함수
+  // 비밀번호 확인 이벤트 연결
+  document.getElementById('password').addEventListener('input', checkPassword);
+  document.getElementById('passwordConfirm').addEventListener('input', checkPassword);
+
+  function checkPassword() {
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('passwordConfirm').value;
+    const resultPassword = document.getElementById('passwordCheckResult');
+
+    // 비밀번호 길이 유효성 검사
+    if (password.length < 8 || password.length > 20) {
+      setResultMessage(resultPassword, "비밀번호는 8자 이상 20자 이하여야 합니다.", false);
+      return;
+    }
+
+    // 정규식 검사
+    const regex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$/
+    if(!regex.test(password)){
+      setResultMessage(resultPassword, "비밀번호는 영문자와 특수문자를 반드시 포함해야 합니다.", false);
+      return;
+    }
+
+    // 비밀번호 일치 여부 확인
+    if(password === passwordConfirm) {
+      setResultMessage(resultPassword, "비밀번호가 일치합니다.", true);
+    } else {
+      setResultMessage(resultPassword, "비밀번호가 일치하지 않습니다.", false);
+    }
+  }
+
+  // nickname을 확인하기 위한 함수
+  function checkNickname() {
+    const nickname = document.getElementById('nickname').value;
+    const resultNickname = document.getElementById('nicknameCheckResult');
+
+    // 닉네임 입력 여부
+    if(!nickname) {
+      setResultMessage(resultNickname, "", false);
+      alert("별명을 입력하세요.");
+      return;
+    }
+
+    // 닉네임 길이 유효성 검사
+    if(nickname.length < 2 || nickname.length > 15) {
+      setResultMessage(resultNickname, "별명은 2자 이상 15자 이하여야 합니다.", false);
+      return;
+    }
+
+    //서버에 닉네임 중복 확인 요청
+    fetch('/api/user/checkNickname', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({nickname: nickname})
+    })
+      .then(response => response.json())
+      .then(data => {
+      if(data.isAvailableNickname){
+        setResultMessage(resultNickname, "사용 가능한 닉네임입니다.", true);
+      } else {
+        setResultMessage(resultNickname, "이미 사용 중인 닉네임입니다.", false);
+      }
+    })
+    .catch(error => {
+      console.error('Error:',error);
+      alert("잠시 후 다시 시도해 주세요.");
+      });
+    }
+
+
+  // 회원 가입 전, 모든 필드가 유효한지 최종 확인 함수 시작
+  function validateFormBeforeSubmit() {
+
+      const resultLoginId = document.getElementById('loginIdCheckResult').classList.contains('text-success');
+      const resultPassword = document.getElementById('passwordCheckResult').classList.contains('text-success');
+      const resultNickname = document.getElementById('nicknameCheckResult').classList.contains('text-success');
+
+
+      // 최종 검사 시작
+      if (!resultLoginId) {
+          alert("아이디 중복 확인을 해주세요.");
+          return false;
+      }
+      if (!resultPassword) {
+          alert("비밀번호를 확인해 주세요.");
+          return false;
+      }
+      if (!resultNickname) {
+          alert("닉네임 중복 확인을 해주세요.");
+          return false;
+      }
+
+      // 모든 검사 통과
+      return true;
+  }
+
+</script>
+
+<!-- 다음 주소 검색 API 스크립트 -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+  //Daum Postcode Service API
+  function daumPostcode() {
+      new daum.Postcode({
+          oncomplete: function(data) {
+              // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+              // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+              // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+              var roadAddr = data.roadAddress; // 도로명 주소 변수
+              var extraRoadAddr = ''; // 참고 항목 변수
+
+              // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+              // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+              if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                  extraRoadAddr += data.bname;
+              }
+              // 건물명이 있고, 공동주택일 경우 추가한다.
+              if(data.buildingName !== '' && data.apartment === 'Y'){
+                 extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+              }
+              // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+              if(extraRoadAddr !== ''){
+                  extraRoadAddr = ' (' + extraRoadAddr + ')';
+              }
+              // 우편번호와 주소 정보를 해당 필드에 넣는다.
+              document.getElementById('postcode').value = data.zonecode;
+              document.getElementById("address").value = roadAddr;
+
+              // 참고항목 문자열이 있을 경우 해당 필드에 넣는다.
+              document.getElementById("addressExtra").value = extraRoadAddr || '';
+
+              document.getElementById("addressDetail").focus();
+          }
+      }).open();
+  }
+</script>
+
+
+</body>
+</html>

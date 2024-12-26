@@ -1,5 +1,6 @@
 package com.community.ukae.service.user;
 
+import com.community.ukae.dto.kakao.KakaoRequestDTO;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -27,6 +29,9 @@ public class UserService {
     }
     public boolean checkEmail(String email){
         return !userRepository.existsByEmail(email);
+    }
+    public Optional<User> findByNameAndEmail(String name, String email) {
+        return userRepository.findByNameAndEmail(name, email);
     }
 
     // 회원 등록
