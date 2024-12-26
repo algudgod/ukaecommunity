@@ -1,5 +1,6 @@
 package com.community.ukae.controller.user;
 
+import com.community.ukae.dto.kakao.KakaoRequestDTO;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
@@ -23,6 +24,13 @@ public class UserController {
     @GetMapping("addUserForm")
     public String addUserForm() {
         return "user/addUserForm";
+    }
+
+    // 회원 등록 form (카카오)
+    @GetMapping("addKakaoUserForm")
+    public String addKakaoUserForm(@ModelAttribute KakaoRequestDTO kakaoRequest, Model model) {
+        model.addAttribute("kakaoRequest", kakaoRequest); // 모델에 DTO 추가
+        return "user/addKakaoUserForm"; // Thymeleaf 템플릿
     }
 
     // 회원 등록
