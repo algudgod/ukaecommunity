@@ -48,7 +48,7 @@ public class S3Service {
 
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-        String fileUrl = String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s", bucketName, fileName);
+        String fileUrl = getFileUrl(fileName);
 
         // 2. DB 업데이트
         user.setProfileUrl(fileUrl);
@@ -56,4 +56,10 @@ public class S3Service {
 
         return fileUrl; // 반환된 URL
     }
+
+    // 이미지 URL 생성
+    public String getFileUrl(String fileName) {
+        return String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s", bucketName, fileName);
+    }
 }
+

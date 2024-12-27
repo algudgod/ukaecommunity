@@ -1,6 +1,7 @@
 package com.community.ukae.service.kakao;
 
 import com.community.ukae.dto.kakao.KakaoRequestDTO;
+import com.community.ukae.entity.user.User;
 import com.community.ukae.service.user.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,12 @@ public class KakaoService {
         return userService.findByNameAndEmail(name, email).isPresent();
     }
 
+    // 사용자 조회
+    public User findByNameAndEmail(String name, String email) {
+        return userService.findByNameAndEmail(name, email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
     // 핸드폰 번호 포맷팅
     private String formatPhoneNumber(String phone) {
         if (phone == null) return null;
@@ -81,4 +88,6 @@ public class KakaoService {
 
         return modelAndView;
     }
+
+
 }

@@ -4,6 +4,7 @@ import com.community.ukae.dto.kakao.KakaoRequestDTO;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
+import com.community.ukae.service.s3.S3Service;
 import com.community.ukae.service.user.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final S3Service s3Service;
+
 
     // 회원 등록 form
     @GetMapping("addUserForm")
@@ -41,7 +44,10 @@ public class UserController {
 
     // 회원 로그인 form
     @GetMapping("login")
-    public String login() {
+    public String login(Model model) {
+
+        String kakaoLoginImageUrl = s3Service.getFileUrl("kakao_login_medium_narrow.png");
+        model.addAttribute("kakaoLoginImageUrl",kakaoLoginImageUrl);
         return "user/login";
     }
 
