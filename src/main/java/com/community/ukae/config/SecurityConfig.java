@@ -15,7 +15,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // 모든 요청 허용
+                        .requestMatchers("/addUser/kakao").authenticated() // /addUser/kakao 경로 인증 필요
+                        .anyRequest().permitAll() // 그 외 모든 요청 허용
+                )
+                .oauth2Login(oauth2 -> oauth2 // OAuth2 로그인 설정
+                        .defaultSuccessUrl("/addUser/kakao", true) // 인증 성공 후 리다이렉트 경로
+                        .failureUrl("/error") // 인증 실패 시 이동 경로
                 );
         return http.build();
     }
