@@ -1,7 +1,6 @@
 package com.community.ukae.service.user;
 
 import com.community.ukae.dto.email.EmailRequestDTO;
-import com.community.ukae.dto.kakao.KakaoRequestDTO;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
@@ -160,5 +159,26 @@ public class UserService {
         emailService.sendEmail(new EmailRequestDTO(email, subject, content));
     }
 
+    // 비밀번호 수정
+    public void updatePassword(String loginId, String currentPassword, String newPassword) {
+
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+        // 새 비밀번호 암호화 후 저장
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user); // 변경된 비밀번호 저장
+    }
+
 
 }
+
+
+
+
+
+
+

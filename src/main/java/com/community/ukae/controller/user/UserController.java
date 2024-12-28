@@ -67,6 +67,7 @@ public class UserController {
         }
     }
 
+    // 회원 로그아웃
     @GetMapping("logout")
     public String logout(HttpSession session) {
         session.removeAttribute("user");
@@ -123,5 +124,6 @@ public class UserController {
 
         return "redirect:/";
     }
+
 }
 

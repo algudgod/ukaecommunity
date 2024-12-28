@@ -1,6 +1,8 @@
 package com.community.ukae.controller.user;
 
+import com.community.ukae.entity.user.User;
 import com.community.ukae.service.user.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +91,30 @@ public class UserRestController {
         try {
             userService.makeAndSendTempPassword(loginId, email);
             return ResponseEntity.ok("임시 비밀번호가 발송되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
+    // 비밀번호 변경
+    @PostMapping("/updatePassword")
+    public ResponseEntity<String> updatePassword(@RequestBody Map<String, String> request, HttpSession session) {
+        String currentPassword = request.get("currentPassword");
+        String newPassword = request.get("newPassword");
+
+        // 세션에서 User 객체 가져오기
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        try {
+            // 비밀번호 업데이트 서비스 호출
+            userService.updatePassword(user.getLoginId(), currentPassword, newPassword);
+
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
