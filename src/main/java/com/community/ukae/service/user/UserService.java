@@ -1,16 +1,19 @@
 package com.community.ukae.service.user;
 
+import com.community.ukae.dto.email.EmailRequestDTO;
 import com.community.ukae.dto.kakao.KakaoRequestDTO;
 import com.community.ukae.dto.user.UserRequestDTO;
 import com.community.ukae.dto.user.UserUpdateDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.repository.user.UserRepository;
+import com.community.ukae.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Service
@@ -18,7 +21,8 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // 비밀번호 암호화
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // 중복 여부 확인
     public boolean checkLoginId(String loginId) {
@@ -125,7 +129,7 @@ public class UserService {
     }
 
     // 회원 비밀번호 찾기
-    public String findUserPasswordByLoginIdAndEmail(String loginId, String email) {
+    public void findUserPasswordByLoginIdAndEmail(String loginId, String email) {
         // 로그인 아이디와 이메일로 사용자 조회
         User user = userRepository.findByLoginIdAndEmail(loginId, email)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
@@ -134,8 +138,27 @@ public class UserService {
         if (!"Y".equals(user.getUseYn())) {
             throw new IllegalStateException("비활성화된 계정입니다.");
         }
-
-        return user.getPassword();
     }
+
+    // 임시 비밀번호 발급 (랜덤)
+    public void makeAndSendTempPassword(String loginId, String email) {
+        // 사용자 검증
+        User user = userRepository.findByLoginIdAndEmail(loginId, email)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
+
+        // 임시 비밀번호 생성
+        String tempPassword = UUID.randomUUID().toString().substring(0, 6) + "!@";
+
+        // 비밀번호 암호화 후 저장
+        user.setPassword(passwordEncoder.encode(tempPassword));
+        userRepository.save(user);
+
+        // 이메일 발송
+        String subject = "유쾌 커뮤니티 임시 비밀번호 발급 이메일입니다.";
+        String content = "<p>임시 비밀번호: <strong>" + tempPassword + "</strong></p>" +
+                "<p>로그인 후 반드시 비밀번호를 변경해주세요.</p>";
+        emailService.sendEmail(new EmailRequestDTO(email, subject, content));
+    }
+
 
 }

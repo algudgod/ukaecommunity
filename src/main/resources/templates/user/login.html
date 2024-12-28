@@ -142,13 +142,26 @@
                                placeholder="이메일을 입력하세요" required>
                     </div>
 
-                    <!-- 아이디 찾기 버튼 -->
+                    <!-- 비밀번호 찾기 버튼 -->
                     <div class="d-flex justify-content-center">
                         <button type="button" class="btn btn-outline-dark w-100" onclick="findUserPassword()">비밀번호 찾기
                         </button>
                     </div>
                 </form>
+
+                <!-- 결과 메시지 -->
                 <p id="findUserPasswordResult" class="result-message mt-3"></p>
+
+                <!-- 임시 비밀번호 발송 여부 묻기 -->
+                <div id="sendTempPassword" class="d-none mt-3 ">
+                    <p class="text-center fw-bold">입력한 정보와 일치하는 계정이 확인되었습니다. <br>
+                                                     임시 비밀번호를 이메일로 발송하시겠습니까?</p>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-dark btn-sm" onclick="sendTemporaryPassword()">임시 비밀번호 발송
+                        </button>
+                    </div>
+                </div>
+
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">닫기</button>
@@ -173,10 +186,15 @@
             modal.addEventListener('hidden.bs.modal', () => {
                 const inputs = modal.querySelectorAll('input');
                 const resultElements = modal.querySelectorAll('.result-message');
+                const sendTempPassword = document.getElementById('sendTempPassword');
+
                 inputs.forEach(input => input.value = ''); // 모든 입력 필드 초기화
                 resultElements.forEach(element => {
                     element.innerText = ''; // 결과 메시지를 초기화
                 });
+                if (sendTempPassword) {
+                    sendTempPassword.classList.add('d-none'); // 숨김 처리
+                }
             });
         });
     });
@@ -238,6 +256,8 @@
         const loginId = document.getElementById('loginIdForFindUserPassword').value.trim();
         const email = document.getElementById('emailForFindUserPassword').value.trim();
         const findUserPasswordResult = document.getElementById('findUserPasswordResult');
+        const sendTempPassword = document.getElementById('sendTempPassword');
+
 
         // 요청 전 입력값 확인
         if (!loginId || !email) {
@@ -261,9 +281,44 @@
         })
         .then(result => {
             setResultMessage(findUserPasswordResult, result, true);
+            sendTempPassword.classList.remove('d-none'); // 임시 비밀번호 발송 여부 묻기 활성화
+
         })
         .catch(error => {
             setResultMessage(findUserPasswordResult, error.message, false);
+            sendTempPassword.classList.add('d-none'); // 임시 발송 여부 묻기 숨기기
+
+        });
+    }
+
+    function sendTemporaryPassword() {
+        const loginId = document.getElementById('loginIdForFindUserPassword').value.trim();
+        const email = document.getElementById('emailForFindUserPassword').value.trim();
+        const findUserPasswordResult = document.getElementById('findUserPasswordResult');
+
+        // 요청 전 입력값 검증
+        if (!loginId || !email) {
+            setResultMessage(findUserPasswordResult, "아이디와 이메일을 다시 확인해주세요.", false);
+            return;
+        }
+
+        // API 호출
+        fetch('/api/user/sendTemporaryPassword', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loginId, email })
+        })
+        .then(response => response.text().then(message => {
+            if (!response.ok) {
+                throw new Error(message); // 오류 발생 시
+            }
+            return message;
+        }))
+        .then(result => {
+            setResultMessage(findUserPasswordResult, "임시 비밀번호가 이메일로 발송되었습니다.", true);
+        })
+        .catch(error => {
+            setResultMessage(findUserPasswordResult, error.message || "임시 비밀번호 발송에 실패했습니다.", false);
         });
     }
 

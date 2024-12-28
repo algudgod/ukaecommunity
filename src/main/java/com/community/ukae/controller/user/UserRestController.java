@@ -71,14 +71,31 @@ public class UserRestController {
             return ResponseEntity.badRequest().body("아이디와 이메일을 모두 입력해주세요.");
         }
         try {
-            String maskedUserPassword = userService.findUserPasswordByLoginIdAndEmail(loginId, email);
-            return ResponseEntity.ok(maskedUserPassword); // 성공 시 마스킹된 아이디 반환
+            userService.findUserPasswordByLoginIdAndEmail(loginId, email);
+            return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
+
+    // 임시 비밀번호 발급
+    @PostMapping("sendTemporaryPassword")
+    public ResponseEntity<String> sendTempPassword(@RequestBody Map<String, String> request) {
+        String loginId = request.get("loginId");
+        String email = request.get("email");
+
+        try {
+            userService.makeAndSendTempPassword(loginId, email);
+            return ResponseEntity.ok("임시 비밀번호가 발송되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류가 발생했습니다.");
+        }
+    }
+
 
 
 }
