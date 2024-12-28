@@ -24,18 +24,21 @@ public class UserService {
     public boolean checkLoginId(String loginId) {
         return !userRepository.existsByLoginId(loginId);
     }
-    public boolean checkNickname(String nickname){
+
+    public boolean checkNickname(String nickname) {
         return !userRepository.existsByNickname(nickname);
     }
-    public boolean checkEmail(String email){
+
+    public boolean checkEmail(String email) {
         return !userRepository.existsByEmail(email);
     }
+
     public Optional<User> findByNameAndEmail(String name, String email) {
         return userRepository.findByNameAndEmail(name, email);
     }
 
     // 회원 등록
-    public void addUser(UserRequestDTO userRequest){
+    public void addUser(UserRequestDTO userRequest) {
 
         User user = new User();
         user.setLoginId(userRequest.getLoginId());
@@ -49,9 +52,9 @@ public class UserService {
         user.setPhone(userRequest.getPhone());
         user.setGender(userRequest.getGender());
 
-        String fullAddress = userRequest.getAddress()+ " " +
-                            userRequest.getAddressDetail()+ " " +
-                            userRequest.getAddressExtra();
+        String fullAddress = userRequest.getAddress() + " " +
+                userRequest.getAddressDetail() + " " +
+                userRequest.getAddressExtra();
         user.setAddress(fullAddress);
 
         userRepository.save(user);
@@ -103,13 +106,18 @@ public class UserService {
     }
 
     // 회원 아이디 찾기
-    public String findUserIdByNameAndEmail(String name, String email){
+    public String findUserIdByNameAndEmail(String name, String email) {
+        User user = userRepository.findByNameAndEmail(name, email)
+                .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
 
-       User user = userRepository.findByNameAndEmail(name, email)
-               .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
+        if (!"Y".equals(user.getUseYn())) {
+            throw new IllegalStateException("비활성화된 계정입니다.");
+        }
 
-       return maskUserId(user.getLoginId());
+        return maskUserId(user.getLoginId());
     }
+
+    // 아이디 마스킹 처리
     private String maskUserId(String userId) {
 
         int visibleLength = userId.length() - 4;
@@ -122,14 +130,12 @@ public class UserService {
         User user = userRepository.findByLoginIdAndEmail(loginId, email)
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 계정을 찾을 수 없습니다."));
 
-        // 비밀번호 마스킹 처리 후 반환
-        return maskUserPassword(user.getPassword());
+        // 계정 비활성화 여부 확인
+        if (!"Y".equals(user.getUseYn())) {
+            throw new IllegalStateException("비활성화된 계정입니다.");
+        }
+
+        return user.getPassword();
     }
 
-    // 비밀번호 마스킹 처리
-    private String maskUserPassword(String userPassword) {
-
-        int visibleLength = userPassword.length() -4;
-        return userPassword.substring(0, visibleLength) + "****";
-    }
 }

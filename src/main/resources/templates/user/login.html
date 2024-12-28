@@ -47,8 +47,6 @@
                         <img th:src="${kakaoLoginImageUrl}" alt="카카오 로그인" class="img-fluid">
                     </a>
                 </div>
-
-
             </form>
 
             <!-- 구분선 추가 -->
@@ -63,8 +61,12 @@
 
             <!-- 아이디/비밀번호 찾기 링크 -->
             <div class="d-flex justify-content-center gap-2 mt-4">
-                <button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#findUserIdModal">아이디 찾기</button>
-                <button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#findUserPasswordModal">비밀번호 찾기</button>
+                <button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#findUserIdModal">아이디
+                    찾기
+                </button>
+                <button class="btn btn-outline-dark btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#findUserPasswordModal">비밀번호 찾기
+                </button>
             </div>
 
         </div>
@@ -86,13 +88,16 @@
                     <!-- 이름 입력 필드 -->
                     <div class="mb-3 d-flex align-items-center">
                         <label for="nameForFindUserId" class="form-label text-end me-3" style="width: 80px;">이름:</label>
-                        <input type="text" id="nameForFindUserId" name="name" class="form-control" placeholder="이름을 입력하세요" required>
+                        <input type="text" id="nameForFindUserId" name="name" class="form-control"
+                               placeholder="이름을 입력하세요" required>
                     </div>
 
                     <!-- 이메일 입력 필드 -->
                     <div class="mb-3 d-flex align-items-center">
-                        <label for="nameForFindUserEmail" class="form-label text-end me-3" style="width: 80px;">이메일:</label>
-                        <input type="email" id="nameForFindUserEmail" name="email" class="form-control" placeholder="이메일을 입력하세요" required>
+                        <label for="emailForFindUserId" class="form-label text-end me-3"
+                               style="width: 80px;">이메일:</label>
+                        <input type="email" id="emailForFindUserId" name="email" class="form-control"
+                               placeholder="이메일을 입력하세요" required>
                     </div>
 
                     <!-- 아이디 찾기 버튼 -->
@@ -100,7 +105,7 @@
                         <button type="button" class="btn btn-outline-dark w-100" onclick="findUserId()">아이디 찾기</button>
                     </div>
                 </form>
-                <p id="findUserIdResult" class="mt-3 text-success"></p>
+                <p id="findUserIdResult" class="result-message mt-3"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">닫기</button>
@@ -110,7 +115,8 @@
 </div>
 
 <!-- 비밀번호 찾기 모달 -->
-<div class="modal fade" id="findUserPasswordModal" tabindex="-1" aria-labelledby="findUserPasswordModalLabel" aria-hidden="true">
+<div class="modal fade" id="findUserPasswordModal" tabindex="-1" aria-labelledby="findUserPasswordModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -124,21 +130,25 @@
                     <!-- 이름 입력 필드 -->
                     <div class="mb-3 d-flex align-items-center">
                         <label for="loginIdForFindUserPassword" class="form-label text-end me-3" style="width: 80px;">아이디:</label>
-                        <input type="text" id="loginIdForFindUserPassword" name="loginId" class="form-control" placeholder="아이디를 입력하세요" required>
+                        <input type="text" id="loginIdForFindUserPassword" name="loginId" class="form-control"
+                               placeholder="아이디를 입력하세요" required>
                     </div>
 
                     <!-- 이메일 입력 필드 -->
                     <div class="mb-3 d-flex align-items-center">
-                        <label for="emailForFindUserPassword" class="form-label text-end me-3" style="width: 80px;">이메일:</label>
-                        <input type="email" id="emailForFindUserPassword" name="email" class="form-control" placeholder="이메일을 입력하세요" required>
+                        <label for="emailForFindUserPassword" class="form-label text-end me-3"
+                               style="width: 80px;">이메일:</label>
+                        <input type="email" id="emailForFindUserPassword" name="email" class="form-control"
+                               placeholder="이메일을 입력하세요" required>
                     </div>
 
                     <!-- 아이디 찾기 버튼 -->
                     <div class="d-flex justify-content-center">
-                        <button type="button" class="btn btn-outline-dark w-100" onclick="findUserPassword()">비밀번호 찾기</button>
+                        <button type="button" class="btn btn-outline-dark w-100" onclick="findUserPassword()">비밀번호 찾기
+                        </button>
                     </div>
                 </form>
-                <p id="findUserPasswordResult" class="mt-3 text-success"></p>
+                <p id="findUserPasswordResult" class="result-message mt-3"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-dark btn-sm" data-bs-dismiss="modal">닫기</button>
@@ -151,44 +161,113 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+
+    // 페이지가 로드되면 모든 모달을 초기화
+    document.addEventListener('DOMContentLoaded', () => {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            // Bootstrap Modal 초기화
+            new bootstrap.Modal(modal);
+
+            // 모달이 닫힐 때 입력 필드 초기화
+            modal.addEventListener('hidden.bs.modal', () => {
+                const inputs = modal.querySelectorAll('input');
+                const resultElements = modal.querySelectorAll('.result-message');
+                inputs.forEach(input => input.value = ''); // 모든 입력 필드 초기화
+                resultElements.forEach(element => {
+                    element.innerText = ''; // 결과 메시지를 초기화
+                });
+            });
+        });
+    });
+
+    // 메시지 출력 로직 통합 함수
+    function setResultMessage(element, message, isSuccess) {
+        if (message) {
+            element.textContent = message;
+            element.classList.remove("text-danger", "text-success", "small-text");
+            element.classList.add(isSuccess ? "text-success" : "text-danger", "small-text");
+        } else {
+            clearResultMessage(element);
+        }
+    }
+
+    // 메시지 초기화 함수
+    function clearResultMessage(element) {
+    console.log("clearResultMessage called for element:", element);
+        element.textContent = "";
+        element.classList.remove("text-danger", "text-success", "small-text");
+    }
+
+    // 아이디 찾기 함수
     function findUserId() {
         const name = document.getElementById('nameForFindUserId').value;
         const email = document.getElementById('emailForFindUserId').value;
+        const findUserIdResult = document.getElementById('findUserIdResult');
+
+        // 입력값 검증: 이름과 이메일이 비어 있는 경우 메시지 출력
+        if (!name || !email) {
+            setResultMessage(findUserIdResult, "이름과 이메일을 모두 입력해주세요.", false);
+            return;
+        }
 
         fetch('/api/user/findUserId', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email })
         })
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                // 실패 상태일 경우 에러 처리
+                return response.text().then(errorMessage => {
+                    throw new Error(errorMessage);
+                });
+            }
+            return response.text(); // 성공 상태
+        })
         .then(result => {
-            document.getElementById('findUserIdResult').innerText = result; // 서버 응답 결과 출력
+            setResultMessage(findUserIdResult, result, true);
         })
         .catch(error => {
-            document.getElementById('findUserIdResult').innerText = '오류가 발생했습니다. 다시 시도해주세요.';
+            setResultMessage(findUserIdResult, error.message, false);
         });
     }
 
+    // 비밀번호 찾기 함수
     function findUserPassword() {
-        const loginId = document.getElementById('loginIdForFindUserPassword').value;
-        const email = document.getElementById('emailForFindUserPassword').value;
+        const loginId = document.getElementById('loginIdForFindUserPassword').value.trim();
+        const email = document.getElementById('emailForFindUserPassword').value.trim();
+        const findUserPasswordResult = document.getElementById('findUserPasswordResult');
 
-        fetch('/api/user/findUserPassword', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ loginId, email })
-            })
-            .then(response => response.text())
-            .then(result => {
-                document.getElementById('findUserPasswordResult').innerText = result; // 서버 응답 결과 출력
-            })
-            .catch(error => {
-                document.getElementById('findUserPasswordResult').innerText = '오류가 발생했습니다. 다시 시도해주세요.';
-            });
+        // 요청 전 입력값 확인
+        if (!loginId || !email) {
+            setResultMessage(findUserPasswordResult, "아이디와 이메일을 입력해주세요.", false);
+            return;
         }
 
-</script>
+        fetch('/api/user/findUserPassword', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ loginId, email })
+        })
+        .then(response => {
+            return response.text().then(message => {
+                if (!response.ok) {
+                    // 실패 상태인 경우
+                    throw new Error(message);
+                }
+                return message;
+            });
+        })
+        .then(result => {
+            setResultMessage(findUserPasswordResult, result, true);
+        })
+        .catch(error => {
+            setResultMessage(findUserPasswordResult, error.message, false);
+        });
+    }
 
+</script>
 
 </body>
 
