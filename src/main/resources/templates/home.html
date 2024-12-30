@@ -61,33 +61,15 @@
     <section class="py-5">
         <div class="container text-center">
             <div class="row justify-content-center">
-                <div class="col-md-2">
-                    <h5 class="fw-bold title-board">유쾌커뮤니티</h5>
+                <div class="col-md-2" th:each="categories : ${groupedCategories}">
+                    <!-- 대분류 출력 -->
+                    <h5 class="fw-bold title-board" th:text="${categories.key}"></h5>
                     <ul class="list-board">
-                        <li><a href="#">공지</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2">
-                    <h5 class="fw-bold title-board">전체</h5>
-                    <ul class="list-board">
-                        <li><a href="#">HOT</a></li>
-                        <li><a href="#">이벤트</a></li>
-
-                    </ul>
-                </div>
-                <div class="col-md-2">
-                    <h5 class="fw-bold title-board">생활</h5>
-                    <ul class="list-board">
-                        <li><a href="#">일상</a></li>
-                        <li><a href="#">직장인</a></li>
-                        <li><a href="#">주식</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-2">
-                    <h5 class="fw-bold title-board">스포츠</h5>
-                    <ul class="list-board">
-                        <li><a href="#">야구</a></li>
-                        <li><a href="#">축구</a></li>
+                        <!-- 소분류 출력 -->
+                        <li th:each="subcategory : ${categories.value}">
+                            <a th:href="@{/board/boardList(mainCategory=${categories.key}, subCategory=${subcategory})}"
+                               th:text="${subcategory}"></a>
+                        </li>
                     </ul>
                 </div>
             </div>
