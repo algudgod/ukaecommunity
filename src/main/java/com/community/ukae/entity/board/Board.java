@@ -14,7 +14,6 @@ public class Board {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int boardNo;
     private String category;
-    private String subCategory;
     private String tag;
     private String title;
     private String content;
