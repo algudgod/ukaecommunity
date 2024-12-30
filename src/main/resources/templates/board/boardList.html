@@ -24,16 +24,21 @@
 
     <!-- 게시글 목록 -->
     <div class="col-md-12">
-      <h2 class="mb-3" th:text="${category.displayName} + ' - ' + ${subCategory.displayName}"></h2>
+
+      <!-- 게시판 제목 -->
+      <h4 class="board-mainCategoryName mb-2" th:text="${mainCategory + ' / ' + subCategory.subCategory} "></h4>
+      <!-- 게시판 부가 설명 -->
+      <p class="board-description" style="font-size: 15px; color: #888;" th:text="${subCategory.description}"></p>
+
 
       <table class="table text-center mt-1 board-table">
         <thead>
-        <tr>
-          <th>#</th>
-          <th>제목</th>
-          <th>작성자</th>
-          <th>작성일</th>
-          <th>조회</th>
+        <tr style="font-size: 15px;">
+          <th style="width: 50px;"></th>
+          <th style="width: 400px;">제목</th>
+          <th style="width: 200px;">작성자</th>
+          <th style="width: 150px;">작성일</th>
+          <th style="width: 100px;">조회</th>
         </tr>
         </thead>
 

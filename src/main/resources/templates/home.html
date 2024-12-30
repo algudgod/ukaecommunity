@@ -67,8 +67,8 @@
                     <ul class="list-board">
                         <!-- 소분류 출력 -->
                         <li th:each="subcategory : ${categories.value}">
-                            <a th:href="@{/board/boardList(mainCategory=${categories.key}, subCategory=${subcategory})}"
-                               th:text="${subcategory}"></a>
+                            <a th:href="@{/board/boardList(mainCategory=${categories.key}, subCategory=${subcategory.subCategory})}"
+                               th:text="${subcategory.subCategory}"></a>
                         </li>
                     </ul>
                 </div>

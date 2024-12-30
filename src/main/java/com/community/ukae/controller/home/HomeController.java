@@ -28,11 +28,12 @@ public class HomeController {
         if (user != null) {
             model.addAttribute("user", user);
         }
-        // BoardCategory를 대분류 기준으로 그룹화
-        Map<String, List<BoardCategory>> groupedCategories = Arrays.stream(BoardCategory.values())
-                .collect(Collectors.groupingBy(BoardCategory::getMainCategory));
 
-        model.addAttribute("groupedCategories", groupedCategories); // 뷰로 전달
-        return "home"; // home.html 렌더링
+        // key: mainCategory, value: 해당 mainCategory에 속하는 subCategory의 리스트
+        Map<String, List<BoardCategory>> groupedCategories = Arrays.stream(BoardCategory.values())
+                .collect(Collectors.groupingBy(BoardCategory::getMainCategory)); // mainCategory를 기준으로 그룹화
+
+        model.addAttribute("groupedCategories", groupedCategories);
+        return "home";
     }
 }
