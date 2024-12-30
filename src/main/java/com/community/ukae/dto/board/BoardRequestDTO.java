@@ -11,7 +11,7 @@ public class BoardRequestDTO {
 
     private int boardNo;
 
-    private String category;
+    private String mainCategory;
     private String subCategory;
 
     private String title;

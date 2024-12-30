@@ -19,12 +19,12 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("boardList")
-    public String boardList(@RequestParam String category,
+    public String boardList(@RequestParam String mainCategory,
                             @RequestParam String subCategory, Model model){
 
-        List<BoardRequestDTO> boards = boardService.boardList(category, subCategory);
+        List<BoardRequestDTO> boards = boardService.boardList(mainCategory, subCategory);
 
-        model.addAttribute("category", category);  // 대분류 카테고리
+        model.addAttribute("mainCategory", mainCategory);  // 대분류 카테고리
         model.addAttribute("subCategory", subCategory);  // 서브카테고리
         model.addAttribute("boards", boards);  // 게시글 리스트
 

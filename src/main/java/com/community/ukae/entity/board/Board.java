@@ -13,7 +13,7 @@ public class Board {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int boardNo;
-    private String category;
+    private String mainCategory;
     private String subCategory;
     private String tag;
     private String title;
