@@ -1,15 +1,18 @@
 package com.community.ukae.dto.board;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@AllArgsConstructor
 public class BoardRequestDTO {
 
     private int boardNo;
 
     private String category;
+    private String subCategory;
 
     private String title;
     private String nickname;
