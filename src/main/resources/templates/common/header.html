@@ -5,7 +5,6 @@
     <title>Header</title>
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 
-
 </head>
 
 <body>
@@ -38,7 +37,7 @@
                 <!-- 닉네임/로그아웃 메뉴 -->
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0" th:if="${user != null}">
                     <li class=" nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" th:href="@{/user/profile}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-hearts"></i>
                             <span th:text="${user.nickname}"></span>
                         </a>
@@ -90,10 +89,7 @@
         </div>
     </div>
 
-
 </header>
-
-
 
 </body>
 </html>
