@@ -2,7 +2,9 @@ package com.community.ukae.controller.home;
 
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
+import com.community.ukae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -17,9 +19,12 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/")
+@RequiredArgsConstructor
 public class HomeController {
 
+
     private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+    private final BoardService boardService;
 
     @GetMapping
     public String home(HttpSession session, Model model) {
@@ -29,11 +34,7 @@ public class HomeController {
             model.addAttribute("user", user);
         }
 
-        // key: mainCategory, value: 해당 mainCategory에 속하는 subCategory의 리스트
-        Map<String, List<BoardCategory>> groupedCategories = Arrays.stream(BoardCategory.values())
-                .collect(Collectors.groupingBy(BoardCategory::getMainCategory)); // mainCategory를 기준으로 그룹화
-
-        model.addAttribute("groupedCategories", groupedCategories);
+        model.addAttribute("boardCategories", boardService.getAllCategories());
         return "home";
     }
 }

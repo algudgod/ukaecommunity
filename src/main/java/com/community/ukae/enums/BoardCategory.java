@@ -28,5 +28,4 @@ public enum BoardCategory {
     private final String description;   // 설명
 
 
-
 }
