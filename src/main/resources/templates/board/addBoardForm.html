@@ -21,6 +21,10 @@
             width: 50px;
         }
 
+        .error-message {
+            color: red;
+        }
+
     </style>
 </head>
 <body>
@@ -30,15 +34,12 @@
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-6">
 
-            <div th:if="${error}">
-                <p class="text-danger" th:text="${error}"></p>
-            </div>
-
             <form th:action="@{/board/addBoard}" th:object="${boardRequest}" method="post">
 
                 <div class="mb-4">
                     <div class="d-flex align-items-center">
-                        <p id="mainCategoryText" class="board-mainCategoryName mb-0 me-2" th:field="*{mainCategory}" th:text="*{mainCategory}"></p>
+                        <p id="mainCategoryText" class="board-mainCategoryName mb-0 me-3" th:field="*{mainCategory}"
+                           th:text="*{mainCategory}"></p>
                         <span class="me-3">/</span>
                         <div class="dropdown">
                             <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
@@ -66,19 +67,24 @@
                     </div>
                 </div>
                 <!-- Hidden fields -->
-                <input type="hidden" th:field="*{mainCategory}" />
-                <input type="hidden" th:field="*{subCategory}" />
+                <input type="hidden" th:field="*{mainCategory}"/>
+                <input type="hidden" th:field="*{subCategory}"/>
 
                 <!-- 제목 입력 -->
                 <div class="mb-3">
                     <input type="text" id="title" name="title" class="form-control" placeholder="제목을 입력하세요"
-                           required>
+                           th:field="*{title}" required>
+                    <div th:if="${titleError}" class="error-message" th:text="${titleError}"></div>
+
                 </div>
 
                 <!-- 내용 입력 -->
                 <div class="mb-3">
                     <textarea id="content" name="content" class="form-control" rows="10" placeholder="내용을 입력하세요"
+                              th:field="*{content}"
                               required></textarea>
+                    <div th:if="${contentError}" class="error-message" th:text="${contentError}"></div>
+
                 </div>
 
                 <!-- 등록 버튼 -->
