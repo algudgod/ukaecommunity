@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <title>게시판</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+</head>
+<body>
+<!-- 공통 헤더 -->
+<div th:replace="~{common/header :: header}"></div>
+
+<!-- 게시글 상세보기 컨테이너 -->
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <!-- 목록 버튼 -->
+
+      <!-- 게시글 제목 -->
+      <h2 th:text="${board.title}"></h2>
+
+      <!-- 작성자 및 작성일 -->
+      <div class="text-muted mb-3">
+        <span th:text="${board.nickname}"></span>
+        <span th:text="'조회수: ' + ${board.viewCount}" class="ms-3"></span>
+        <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}" class="ms-3"></span>
+      </div>
+
+      <!-- 구분선 -->
+      <hr>
+
+      <!-- 게시글 내용 -->
+      <div class="mb-4" style="white-space: pre-line;">
+        <p th:text="${board.content}"></p>
+      </div>
+
+      <!-- 목록, 수정, 삭제 버튼 -->
+      <div class="d-flex justify-content-between">
+        <a th:href="@{/boardList(boardCategory=${boardCategory})}" class="btn btn-sm btn-outline-secondary">목록</a>
+
+        <!-- 수정/삭제 버튼 -->
+        <div>
+          <a th:if="${user != null and user.nickname == board.nickname}"
+             th:href="@{/boards/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+             class="btn btn-sm btn-outline-secondary">수정</a>
+          <form th:if="${user != null and user.nickname == board.nickname}"
+                th:action="@{/boards/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                method="post"
+                onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                style="display: inline;">
+            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

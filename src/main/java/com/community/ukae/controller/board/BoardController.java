@@ -1,6 +1,7 @@
 package com.community.ukae.controller.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
+import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.service.board.BoardService;
@@ -12,10 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -52,7 +50,7 @@ public class BoardController {
 
     }
 
-    // 글쓰기 form
+    // 게시글 쓰기 form
     @GetMapping("addBoardForm")
     public String addBoardForm(@RequestParam String mainCategory,
                                @RequestParam String subCategory,
@@ -76,7 +74,7 @@ public class BoardController {
         return "board/addBoardForm";
     }
 
-    // 글 쓰기
+    // 게시글 쓰기
     @PostMapping("addBoard")
     public String addBoard(@Valid BoardRequestDTO boardRequest,
                            BindingResult result,
@@ -111,4 +109,21 @@ public class BoardController {
         }
     }
 
+    // 게시글 상세 조회
+    @GetMapping("detail/{boardNo}")
+    public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
+
+        User user = (User) session.getAttribute("user");
+        model.addAttribute("user", user);
+
+        BoardRequestDTO  board = boardService.findBoardByBoardNo(boardNo);
+
+
+        model.addAttribute("board",board);
+        model.addAttribute("boardCategories", boardService.getAllCategories());
+        model.addAttribute("boardCategory", board.getMainCategory() + " > " + board.getSubCategory());
+
+        return "board/boardDetail";
+
+    }
 }

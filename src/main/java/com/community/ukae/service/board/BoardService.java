@@ -85,4 +85,23 @@ public class BoardService {
         boards.sort(Comparator.comparing(BoardRequestDTO::getCreateDate).reversed());
         return boards;
     }
+
+    public BoardRequestDTO findBoardByBoardNo(int boardNo) {
+        Board board = boardRepository.findByBoardNo(boardNo)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 게시글입니다."));
+
+        return BoardRequestDTO.builder()
+                .boardNo(board.getBoardNo())
+                .mainCategory(board.getMainCategory())
+                .subCategory(board.getSubCategory())
+                .title(board.getTitle())
+                .nickname(board.getUser().getNickname())
+                .content(board.getContent())
+                .viewCount(board.getViewCount())
+                .createDate(board.getCreateDate())
+                .build();
+
+    }
+
+
 }

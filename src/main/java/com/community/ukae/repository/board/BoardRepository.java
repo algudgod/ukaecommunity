@@ -7,11 +7,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Integer> {
 
+    // 조회
     List<Board> findByMainCategoryAndSubCategory(String mainCategory, String subCategory);
+    Optional<Board> findByBoardNo(int boardNo);
+
 
     @Query(value = "SELECT " +
             "b.main_category, " +

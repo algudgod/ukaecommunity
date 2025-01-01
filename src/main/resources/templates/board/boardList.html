@@ -73,7 +73,7 @@
                 <tr class="board-row" th:each="board : ${boards}">
                     <td class="board-CategoryBoardNo" th:text="${board.categoryBoardNo}"></td>
                     <td class="board-title">
-                        <a th:href="@{/board/detail(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
+                        <a th:href="@{/board/detail/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
                     </td>
                     <td class="board-nickname" th:text="${board.nickname}"></td>
                     <td th:text="${board.createDate.toLocalDate().isEqual(T(java.time.LocalDate).now())
