@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,11 @@ public class BoardService {
     // Map Value: 해당 mainCategory 에 속하는 BoardCategory 객체 리스트
     public Map<String, List<BoardCategory>> getAllCategories() {
         return Arrays.stream(BoardCategory.values())
-                .collect(Collectors.groupingBy(BoardCategory::getMainCategory));
+                .collect(Collectors.groupingBy(
+                        BoardCategory::getMainCategory, // 그룹화 기준
+                        LinkedHashMap::new,             // 순서를 보장하는 Map 생성
+                        Collectors.toList()             // 그룹화된 항목을 List 로 수집
+                ));
     }
 
     public void addBoard(BoardRequestDTO boardRequest, User user) {
