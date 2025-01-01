@@ -13,16 +13,17 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
     <style>
 
-        .board-row{
+        .board-row {
             font-size: 14px;
         }
 
-        .board-nickname{
+        .board-nickname,
+        .board-title {
            text-align: left;
         }
 
         /* 제목의 하이퍼링크 커스텀 */
-        .board-title a{
+        .board-title a {
             color: black;
             text-decoration: none;
         }
@@ -52,7 +53,7 @@
                    class="btn btn-outline-dark btn-sm">글쓰기</a>
             </div>
 
-            <table class="table text-center mt-1 board-table" style="min-height: 500px;">
+            <table class="table text-center mt-1 board-table" >
 
                 <thead>
                 <tr style="font-size: 15px;">
@@ -70,7 +71,7 @@
                 </tr>
 
                 <tr class="board-row" th:each="board : ${boards}">
-                    <td class="board-boardNo" th:text="${board.boardNo}"></td>
+                    <td class="board-CategoryBoardNo" th:text="${board.categoryBoardNo}"></td>
                     <td class="board-title">
                         <a th:href="@{/board/detail(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
                     </td>

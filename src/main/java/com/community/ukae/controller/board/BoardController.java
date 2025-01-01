@@ -44,8 +44,9 @@ public class BoardController {
         model.addAttribute("mainCategory", mainCategory); // @RequestParam 으로 전달받은 mainCategory String 값
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
 
-        List<BoardRequestDTO> boards = boardService.boardList(mainCategory, subCategory); // 호출 결과로 반환된 게시글 DTO 리스트.
-        model.addAttribute("boards", boards);
+
+        List<BoardRequestDTO> boardRequest = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
+        model.addAttribute("boards",boardRequest);
 
         return "board/boardList";
 
@@ -86,7 +87,7 @@ public class BoardController {
             model.addAttribute("titleError", result.hasFieldErrors("title") ?
                     "제목은 3자 이상, 100자 이하입니다." : null);
             model.addAttribute("contentError", result.hasFieldErrors("content") ?
-                    "내용은 최소 10자 이상, 2000자 이하입니다." : null);
+                    "내용은 최소 5자 이상, 2000자 이하입니다." : null);
             model.addAttribute("boardRequest", boardRequest);
             return "board/addBoardForm";
         }

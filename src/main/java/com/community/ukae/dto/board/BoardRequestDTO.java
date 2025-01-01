@@ -26,8 +26,9 @@ public class BoardRequestDTO {
     private String content;
 
     private int viewCount;
+    private LocalDateTime createDate;
 
-    private LocalDateTime createDate; // 추가된 필드
+    private int categoryBoardNo;
 
     public BoardRequestDTO() {
 

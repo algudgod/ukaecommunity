@@ -8,41 +8,15 @@ import com.community.ukae.repository.board.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.sql.Timestamp;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.LinkedHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class BoardService {
 
     private final BoardRepository boardRepository;
-
-    public List<BoardRequestDTO> boardList(String mainCategory, String subCategory) {
-
-        List<Board> boards = boardRepository.findByMainCategoryAndSubCategory(mainCategory, subCategory);
-
-        // Board 엔티티를 BoardRequestDTO로 변환
-        return boards.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-    // 엔티티를 DTO로 변환하는 메서드
-    private BoardRequestDTO convertToDTO(Board board) {
-        return new BoardRequestDTO(
-                board.getBoardNo(),
-                board.getMainCategory(),
-                board.getSubCategory(),
-                board.getTitle(),
-                board.getUser().getNickname(),
-                board.getContent(),
-                board.getViewCount(),
-                board.getCreateDate()
-
-        );
-    }
 
     // mainCategory와 subCategory에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
@@ -70,8 +44,8 @@ public class BoardService {
         if (boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
             throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
         }
-        if (boardRequest.getContent().length() < 10 || boardRequest.getContent().length() > 2000) {
-            throw new IllegalArgumentException("내용은 최소 10자 이상, 2000자 이하이어야 합니다.");
+        if (boardRequest.getContent().length() < 5 || boardRequest.getContent().length() > 2000) {
+            throw new IllegalArgumentException("내용은 최소 5자 이상, 2000자 이하이어야 합니다.");
         }
 
         Board board = new Board();
@@ -82,5 +56,33 @@ public class BoardService {
         board.setUser(user);
 
         boardRepository.save(board);
+    }
+
+    // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
+    public List<BoardRequestDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory){
+
+        List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
+
+        for (Object[] row : rows) {
+            System.out.println("Row Data: " + Arrays.toString(row));
+        }
+
+        List<BoardRequestDTO> boards = new ArrayList<>();
+            for(Object[] row : rows) {
+                BoardRequestDTO boardRequest = new BoardRequestDTO();
+                boardRequest.setMainCategory((String)row[0]);
+                boardRequest.setSubCategory((String) row[1]);
+                boardRequest.setCategoryBoardNo(((Number)row[2]).intValue());
+                boardRequest.setBoardNo(((Number)row[3]).intValue());
+                boardRequest.setTitle((String) row[4]);
+                boardRequest.setNickname((String) row[5]);
+                boardRequest.setContent((String) row[6]);
+                boardRequest.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
+                boardRequest.setViewCount(((Number) row[8]).intValue());
+
+                boards.add(boardRequest);
+        }
+        boards.sort(Comparator.comparing(BoardRequestDTO::getCreateDate).reversed());
+        return boards;
     }
 }
