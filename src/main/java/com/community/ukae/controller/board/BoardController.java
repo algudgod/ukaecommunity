@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 @Controller
@@ -62,17 +64,15 @@ public class BoardController {
         }
         model.addAttribute("user", user);
 
-        // DTO 생성 및 초기화
         BoardRequestDTO boardRequest = new BoardRequestDTO();
         boardRequest.setMainCategory(mainCategory);
         boardRequest.setSubCategory(subCategory);
-        boardRequest.setNickname(user.getNickname()); // 사용자 닉네임도 추가 가능
+        boardRequest.setNickname(user.getNickname());
 
-        // 모델에 DTO 추가
         model.addAttribute("boardRequest", boardRequest);
         model.addAttribute("boardCategories", boardService.getAllCategories());
 
-        return "board/addBoardForm"; // 뷰로 넘김
+        return "board/addBoardForm";
     }
 
     // 글 쓰기
@@ -83,8 +83,10 @@ public class BoardController {
                            Model model) {
 
         if (result.hasErrors()) {
-            System.out.println("Validation errors: " + result.getAllErrors());
-            model.addAttribute("error", "입력한 데이터에 오류가 있습니다.");
+            model.addAttribute("titleError", result.hasFieldErrors("title") ?
+                    "제목은 3자 이상, 100자 이하입니다." : null);
+            model.addAttribute("contentError", result.hasFieldErrors("content") ?
+                    "내용은 최소 10자 이상, 2000자 이하입니다." : null);
             model.addAttribute("boardRequest", boardRequest);
             return "board/addBoardForm";
         }
@@ -97,8 +99,15 @@ public class BoardController {
 
         boardService.addBoard(boardRequest, user);
 
-        return "redirect:/board/boardList?mainCategory=" + boardRequest.getMainCategory() +
-                "&subCategory=" + boardRequest.getSubCategory();
+        return "redirect:/board/boardList?mainCategory=" + encode(boardRequest.getMainCategory()) +
+                "&subCategory=" + encode(boardRequest.getSubCategory());
+    }
+    private String encode(String value) {
+        try {
+            return URLEncoder.encode(value, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("URL 인코딩 실패", e);
+        }
     }
 
 }
