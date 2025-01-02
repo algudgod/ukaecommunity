@@ -1,6 +1,7 @@
 package com.community.ukae.service.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
+import com.community.ukae.dto.board.BoardResponseDTO;
 import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.imageFile.ImageFile;
 import com.community.ukae.entity.user.User;
@@ -79,7 +80,6 @@ public class BoardService {
         }
     }
 
-
     private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
         if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
             throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
@@ -90,7 +90,7 @@ public class BoardService {
     }
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
-    public List<BoardRequestDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
+    public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
 
         List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
 
@@ -98,30 +98,36 @@ public class BoardService {
             System.out.println("Row Data: " + Arrays.toString(row));
         }
 
-        List<BoardRequestDTO> boards = new ArrayList<>();
+        List<BoardResponseDTO> boards = new ArrayList<>();
         for (Object[] row : rows) {
-            BoardRequestDTO boardRequest = new BoardRequestDTO();
-            boardRequest.setMainCategory((String) row[0]);
-            boardRequest.setSubCategory((String) row[1]);
-            boardRequest.setCategoryBoardNo(((Number) row[2]).intValue());
-            boardRequest.setBoardNo(((Number) row[3]).intValue());
-            boardRequest.setTitle((String) row[4]);
-            boardRequest.setNickname((String) row[5]);
-            boardRequest.setContent((String) row[6]);
-            boardRequest.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
-            boardRequest.setViewCount(((Number) row[8]).intValue());
+            BoardResponseDTO boardResponse = new BoardResponseDTO();
+            boardResponse.setMainCategory((String) row[0]);
+            boardResponse.setSubCategory((String) row[1]);
+            boardResponse.setCategoryBoardNo(((Number) row[2]).intValue());
+            boardResponse.setBoardNo(((Number) row[3]).intValue());
+            boardResponse.setTitle((String) row[4]);
+            boardResponse.setNickname((String) row[5]);
+            boardResponse.setContent((String) row[6]);
+            boardResponse.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
+            boardResponse.setViewCount(((Number) row[8]).intValue());
 
-            boards.add(boardRequest);
+            boards.add(boardResponse);
         }
-        boards.sort(Comparator.comparing(BoardRequestDTO::getCreateDate).reversed());
+        boards.sort(Comparator.comparing(BoardResponseDTO::getCreateDate).reversed());
         return boards;
     }
 
-    public BoardRequestDTO findBoardByBoardNo(int boardNo) {
+    public BoardResponseDTO findBoardByBoardNo(int boardNo) {
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new NoSuchElementException("해당 게시글을 찾을 수 없습니다."));
 
-        return BoardRequestDTO.builder()
+        // 이미지 URL 리스트 가져오기
+        List<String> imageUrls = imageFileRepository.findByBoard_BoardNo(boardNo)
+                .stream()
+                .map(ImageFile::getImageUrl)
+                .toList();
+
+        return BoardResponseDTO.builder()
                 .boardNo(board.getBoardNo())
                 .mainCategory(board.getMainCategory())
                 .subCategory(board.getSubCategory())
@@ -130,6 +136,7 @@ public class BoardService {
                 .content(board.getContent())
                 .viewCount(board.getViewCount())
                 .createDate(board.getCreateDate())
+                .imageUrls(imageUrls) // 이미지 URL 리스트 설정
                 .build();
 
     }

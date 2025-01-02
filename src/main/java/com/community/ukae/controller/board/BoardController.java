@@ -1,6 +1,7 @@
 package com.community.ukae.controller.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
+import com.community.ukae.dto.board.BoardResponseDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.service.board.BoardService;
@@ -42,8 +43,8 @@ public class BoardController {
         model.addAttribute("mainCategory", mainCategory); // @RequestParam 으로 전달받은 mainCategory String 값
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
 
-        List<BoardRequestDTO> boardRequest = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
-        model.addAttribute("boards",boardRequest);
+        List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
+        model.addAttribute("boards",boardResponse);
 
         return "board/boardList";
 
@@ -117,11 +118,11 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
-        BoardRequestDTO  board = boardService.findBoardByBoardNo(boardNo);
+        BoardResponseDTO  boardResponse  = boardService.findBoardByBoardNo(boardNo);
 
-        model.addAttribute("board",board);
+        model.addAttribute("board",boardResponse );
         model.addAttribute("boardCategories", boardService.getAllCategories());
-        model.addAttribute("boardCategory", board.getMainCategory() + " > " + board.getSubCategory());
+        model.addAttribute("boardCategory", boardResponse.getMainCategory() + " > " + boardResponse.getSubCategory());
 
         return "board/boardDetail";
 
