@@ -1,4 +1,4 @@
-package com.community.ukae.util;
+package com.community.ukae.utils;
 
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;

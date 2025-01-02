@@ -6,6 +6,8 @@ import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.repository.board.BoardRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BoardService {
+    private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
 
     private final BoardRepository boardRepository;
 
@@ -41,25 +44,29 @@ public class BoardService {
 
     public void addBoard(BoardRequestDTO boardRequest, User user) {
 
-        if (boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
+            validateAddBoardRequest(boardRequest);
+
+            Board board = new Board();
+            board.setMainCategory(boardRequest.getMainCategory());
+            board.setSubCategory(boardRequest.getSubCategory());
+            board.setTitle(boardRequest.getTitle());
+            board.setContent(boardRequest.getContent());
+            board.setUser(user);
+
+            boardRepository.save(board);
+    }
+
+    private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
+        if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
             throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
         }
-        if (boardRequest.getContent().length() < 5 || boardRequest.getContent().length() > 2000) {
+        if (boardRequest.getContent() == null || boardRequest.getContent().length() < 5 || boardRequest.getContent().length() > 2000) {
             throw new IllegalArgumentException("내용은 최소 5자 이상, 2000자 이하이어야 합니다.");
         }
-
-        Board board = new Board();
-        board.setMainCategory(boardRequest.getMainCategory());
-        board.setSubCategory(boardRequest.getSubCategory());
-        board.setTitle(boardRequest.getTitle());
-        board.setContent(boardRequest.getContent());
-        board.setUser(user);
-
-        boardRepository.save(board);
     }
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
-    public List<BoardRequestDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory){
+    public List<BoardRequestDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
 
         List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
 
@@ -68,19 +75,19 @@ public class BoardService {
         }
 
         List<BoardRequestDTO> boards = new ArrayList<>();
-            for(Object[] row : rows) {
-                BoardRequestDTO boardRequest = new BoardRequestDTO();
-                boardRequest.setMainCategory((String)row[0]);
-                boardRequest.setSubCategory((String) row[1]);
-                boardRequest.setCategoryBoardNo(((Number)row[2]).intValue());
-                boardRequest.setBoardNo(((Number)row[3]).intValue());
-                boardRequest.setTitle((String) row[4]);
-                boardRequest.setNickname((String) row[5]);
-                boardRequest.setContent((String) row[6]);
-                boardRequest.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
-                boardRequest.setViewCount(((Number) row[8]).intValue());
+        for (Object[] row : rows) {
+            BoardRequestDTO boardRequest = new BoardRequestDTO();
+            boardRequest.setMainCategory((String) row[0]);
+            boardRequest.setSubCategory((String) row[1]);
+            boardRequest.setCategoryBoardNo(((Number) row[2]).intValue());
+            boardRequest.setBoardNo(((Number) row[3]).intValue());
+            boardRequest.setTitle((String) row[4]);
+            boardRequest.setNickname((String) row[5]);
+            boardRequest.setContent((String) row[6]);
+            boardRequest.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
+            boardRequest.setViewCount(((Number) row[8]).intValue());
 
-                boards.add(boardRequest);
+            boards.add(boardRequest);
         }
         boards.sort(Comparator.comparing(BoardRequestDTO::getCreateDate).reversed());
         return boards;
@@ -88,7 +95,7 @@ public class BoardService {
 
     public BoardRequestDTO findBoardByBoardNo(int boardNo) {
         Board board = boardRepository.findByBoardNo(boardNo)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 게시글을 찾을 수 없습니다."));
 
         return BoardRequestDTO.builder()
                 .boardNo(board.getBoardNo())

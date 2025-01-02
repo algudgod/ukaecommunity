@@ -5,6 +5,7 @@ import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.service.board.BoardService;
+import com.community.ukae.utils.UrlEncodeUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,6 @@ public class BoardController {
 
         model.addAttribute("mainCategory", mainCategory); // @RequestParam 으로 전달받은 mainCategory String 값
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
-
 
         List<BoardRequestDTO> boardRequest = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
         model.addAttribute("boards",boardRequest);
@@ -82,10 +82,6 @@ public class BoardController {
                            Model model) {
 
         if (result.hasErrors()) {
-            model.addAttribute("titleError", result.hasFieldErrors("title") ?
-                    "제목은 3자 이상, 100자 이하입니다." : null);
-            model.addAttribute("contentError", result.hasFieldErrors("content") ?
-                    "내용은 최소 5자 이상, 2000자 이하입니다." : null);
             model.addAttribute("boardRequest", boardRequest);
             return "board/addBoardForm";
         }
@@ -96,18 +92,20 @@ public class BoardController {
         }
         model.addAttribute("user", user);
 
-        boardService.addBoard(boardRequest, user);
-
-        return "redirect:/board/boardList?mainCategory=" + encode(boardRequest.getMainCategory()) +
-                "&subCategory=" + encode(boardRequest.getSubCategory());
-    }
-    private String encode(String value) {
         try {
-            return URLEncoder.encode(value, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("URL 인코딩 실패", e);
+            boardService.addBoard(boardRequest, user);
+            logger.info("게시글 작성 성공: {}", boardRequest.getTitle());
+        } catch (IllegalArgumentException e) {
+            logger.error("게시글 작성 실패: {}", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("boardRequest", boardRequest);
+            return "board/addBoardForm";
         }
+
+        return "redirect:/board/boardList?mainCategory=" + UrlEncodeUtil.encode(boardRequest.getMainCategory()) +
+                "&subCategory=" + UrlEncodeUtil.encode(boardRequest.getSubCategory());
     }
+
 
     // 게시글 상세 조회
     @GetMapping("detail/{boardNo}")
@@ -117,7 +115,6 @@ public class BoardController {
         model.addAttribute("user", user);
 
         BoardRequestDTO  board = boardService.findBoardByBoardNo(boardNo);
-
 
         model.addAttribute("board",board);
         model.addAttribute("boardCategories", boardService.getAllCategories());
