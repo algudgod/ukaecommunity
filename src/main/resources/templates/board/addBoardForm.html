@@ -109,6 +109,12 @@
         $('#content').summernote({
             height: 300, // 에디터 높이
             lang: 'ko-KR', // 언어 설정
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']], // 텍스트 스타일
+                    ['para', ['ul', 'ol']], // 리스트와 문단 정렬
+                    ['insert', ['link', 'picture']], // 링크 및 이미지 삽입
+                    ['view', ['fullscreen', 'help']] // 전체 화면 및 도움말
+                ],
             callbacks: {
                 // 이미지 업로드 콜백
                 onImageUpload: function (files) {
