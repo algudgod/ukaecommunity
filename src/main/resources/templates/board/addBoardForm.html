@@ -13,12 +13,13 @@
 
     <style>
 
-        #subCategoryDropdownButton {
-            width: 200px; /* 원하는 고정 너비 */
+        #mainCategoryText {
+            font-weight: bold;
         }
 
-        #mainCategoryText {
-            width: 50px;
+        #subCategoryDropdownButton,
+         #boardTagDropdownButton {
+            width: 150px;
         }
 
         .error-message {
@@ -34,22 +35,23 @@
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-6">
 
-            <form th:action="@{/board/addBoard}" th:object="${boardRequest}" method="post">
+            <form th:action="@{/board/addBoard}" th:object="${boardRequest}" method="post" enctype="multipart/form-data">
 
+            <!-- 카테고리 -->
                 <div class="mb-4">
-                    <div class="d-flex align-items-center">
-                        <p id="mainCategoryText" class="board-mainCategoryName mb-0 me-3" th:field="*{mainCategory}"
+                    <div class="mainCategory">
+                        <p id="mainCategoryText" class="board-mainCategoryName mb-2 me-3" th:field="*{mainCategory}"
                            th:text="*{mainCategory}"></p>
-                        <span class="me-3">/</span>
-                        <div class="dropdown">
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- 카테고리 드롭다운 -->
+                        <div class="dropdown me-3">
                             <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
                                     id="subCategoryDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
-                                    th:field="*{subCategory}" th:text="*{subCategory}">>
+                                    th:field="*{subCategory}" th:text="*{subCategory} ? *{subCategory} : '카테고리 선택'">
                                 카테고리 선택
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="subCategoryDropdownButton">
-                                <!-- boardCategories: Map<String, List<BoardCategory>> -->
-                                <!-- 메인 카테고리(entry.key)와 서브 카테고리 리스트(entry.value)를 순회 -->
                                 <th:block th:each="mainCategoryEntry : ${boardCategories}">
                                     <th:block th:each="category : ${mainCategoryEntry.value}">
                                         <li>
@@ -78,6 +80,13 @@
 
                 </div>
 
+                <!-- 이미지 첨부 필드 -->
+                <div class="mb-3">
+                    <label for="images" class="form-label">이미지 첨부</label>
+                    <input type="file" id="images" th:field="*{images}" class="form-control" accept="image/*" multiple>
+                    <div class="text-danger" th:if="${#fields.hasErrors('images')}" th:errors="*{images}"></div>
+                </div>
+
                 <!-- 내용 입력 -->
                 <div class="mb-3">
                     <textarea id="content" name="content" class="form-control" rows="10" placeholder="내용을 입력하세요"
@@ -100,18 +109,17 @@
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <script>
 
     function selectSubCategory(element) {
-        const selectedSubCategory = element.getAttribute("data-sub-category");
-        const selectedMainCategory = element.getAttribute("data-main-category");
+       const selectedSubCategory = element.getAttribute("data-sub-category");
+       const selectedMainCategory = element.getAttribute("data-main-category");
 
-        // 서브 카테고리와 메인 카테고리 업데이트
-        document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategory;
-        document.getElementById("subCategory").value = selectedSubCategory;
-        document.getElementById("mainCategoryText").innerText = selectedMainCategory;
-    }
+       // 서브 카테고리 업데이트
+       document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategory;
+       document.getElementById("subCategory").value = selectedSubCategory;
+
+   }
 
 </script>
 

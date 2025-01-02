@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -55,6 +57,30 @@ public class S3Service {
         userRepository.save(user);
 
         return fileUrl; // 반환된 URL
+    }
+
+
+
+    public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
+
+        List<String> fileUrls = new ArrayList<>();
+
+        for(MultipartFile file : files){
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String contentType = file.getContentType();
+
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .contentType(contentType)
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            String fileUrl = getFileUrl(fileName);
+            fileUrls.add(fileUrl);
+        }
+
+        return fileUrls;
     }
 
     // 이미지 URL 생성

@@ -6,12 +6,14 @@ import com.community.ukae.service.s3.S3Service;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import java.util.Map;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -63,4 +65,18 @@ public class S3RestController {
         }
     }
 
+    @PostMapping("uploadFiles")
+    public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
+        try {
+            List<String> fileUrls = s3Service.uploadFiles(files);
+            System.out.println("made fileUrl: " + fileUrls);
+
+            // 성공 응답 반환
+            return ResponseEntity.ok().body(fileUrls);
+        } catch (IOException e) {
+            // 예외 처리: 실패 시 에러 메시지 반환
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("파일 업로드 중 오류가 발생했습니다.");
+        }
+    }
 }

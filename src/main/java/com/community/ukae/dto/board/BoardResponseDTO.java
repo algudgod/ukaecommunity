@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BoardRequestDTO {
+public class BoardResponseDTO {
 
     private int boardNo;
 

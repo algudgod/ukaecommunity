@@ -21,10 +21,12 @@
 <div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-10">
-      <!-- 목록 버튼 -->
+
+      <!-- 카테고리 -->
+      <span th:text="${boardCategory}"></span>
 
       <!-- 게시글 제목 -->
-      <h2 th:text="${board.title}"></h2>
+      <h3 th:text="${board.title}"></h3>
 
       <!-- 작성자 및 작성일 -->
       <div class="text-muted mb-3">

@@ -2,14 +2,19 @@ package com.community.ukae.service.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
 import com.community.ukae.entity.board.Board;
+import com.community.ukae.entity.imageFile.ImageFile;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.repository.board.BoardRepository;
+import com.community.ukae.repository.imageFile.ImageFileRepository;
+import com.community.ukae.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +25,8 @@ public class BoardService {
     private static final Logger logger = LoggerFactory.getLogger(BoardService.class);
 
     private final BoardRepository boardRepository;
+    private final ImageFileRepository imageFileRepository;
+    private final S3Service s3Service;
 
     // mainCategory와 subCategory에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
@@ -42,19 +49,36 @@ public class BoardService {
                 ));
     }
 
-    public void addBoard(BoardRequestDTO boardRequest, User user) {
+    public void addBoard(BoardRequestDTO boardRequest, User user, List<MultipartFile> images) throws IOException {
 
-            validateAddBoardRequest(boardRequest);
+        validateAddBoardRequest(boardRequest);
 
-            Board board = new Board();
-            board.setMainCategory(boardRequest.getMainCategory());
-            board.setSubCategory(boardRequest.getSubCategory());
-            board.setTitle(boardRequest.getTitle());
-            board.setContent(boardRequest.getContent());
-            board.setUser(user);
+        Board board = new Board();
+        board.setMainCategory(boardRequest.getMainCategory());
+        board.setSubCategory(boardRequest.getSubCategory());
+        board.setTitle(boardRequest.getTitle());
+        board.setContent(boardRequest.getContent());
+        board.setUser(user);
 
-            boardRepository.save(board);
+        boardRepository.save(board);
+
+        if (images != null && images.size() > 3) {
+            throw new IllegalArgumentException("이미지는 최대 3개까지만 첨부할 수 있습니다.");
+        }
+
+        // 이미지 업로드 및 DB 저장
+        if (images != null && !images.isEmpty()) {
+            List<String> uploadedUrls = s3Service.uploadFiles(images); // S3에 업로드
+
+            for (String url : uploadedUrls) {
+                ImageFile imageFile = new ImageFile();
+                imageFile.setBoard(board); // 게시글과 연관 설정
+                imageFile.setImageUrl(url); // 업로드된 이미지 URL 저장
+                imageFileRepository.save(imageFile); // DB에 저장
+            }
+        }
     }
+
 
     private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
         if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {

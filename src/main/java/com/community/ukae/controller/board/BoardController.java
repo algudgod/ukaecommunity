@@ -1,7 +1,6 @@
 package com.community.ukae.controller.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
-import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.service.board.BoardService;
@@ -15,9 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -78,6 +77,7 @@ public class BoardController {
     @PostMapping("addBoard")
     public String addBoard(@Valid BoardRequestDTO boardRequest,
                            BindingResult result,
+                           @RequestParam(value = "images", required = false) List<MultipartFile> images,
                            HttpSession session,
                            Model model) {
 
@@ -90,13 +90,16 @@ public class BoardController {
         if (user == null) {
             return "redirect:/user/login";
         }
-        model.addAttribute("user", user);
+
+        // 이미지 개수 제한 검증
+        if (images != null && images.size() > 3) {
+            model.addAttribute("error", "이미지는 최대 3개까지만 첨부할 수 있습니다.");
+            return "board/addBoardForm";
+        }
 
         try {
-            boardService.addBoard(boardRequest, user);
-            logger.info("게시글 작성 성공: {}", boardRequest.getTitle());
-        } catch (IllegalArgumentException e) {
-            logger.error("게시글 작성 실패: {}", e.getMessage());
+            boardService.addBoard(boardRequest, user, images); // 서비스 호출
+        } catch (IllegalArgumentException | IOException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("boardRequest", boardRequest);
             return "board/addBoardForm";
