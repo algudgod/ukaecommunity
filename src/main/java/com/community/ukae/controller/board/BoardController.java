@@ -78,7 +78,6 @@ public class BoardController {
     @PostMapping("addBoard")
     public String addBoard(@Valid BoardRequestDTO boardRequest,
                            BindingResult result,
-                           @RequestParam(value = "images", required = false) List<MultipartFile> images,
                            HttpSession session,
                            Model model) {
 
@@ -92,14 +91,9 @@ public class BoardController {
             return "redirect:/user/login";
         }
 
-        // 이미지 개수 제한 검증
-        if (images != null && images.size() > 3) {
-            model.addAttribute("error", "이미지는 최대 3개까지만 첨부할 수 있습니다.");
-            return "board/addBoardForm";
-        }
 
         try {
-            boardService.addBoard(boardRequest, user, images); // 서비스 호출
+            boardService.addBoard(boardRequest, user); // 서비스 호출
         } catch (IllegalArgumentException | IOException e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("boardRequest", boardRequest);

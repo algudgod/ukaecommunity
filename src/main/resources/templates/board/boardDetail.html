@@ -40,15 +40,9 @@
 
       <!-- 게시글 내용 -->
       <div class="mb-4" style="white-space: pre-line;">
-        <p th:text="${board.content}"></p>
+        <div th:utext="${board.content}"></div>
       </div>
 
-      <!-- 게시글 이미지 출력 -->
-      <div th:if="${board.imageUrls != null and !board.imageUrls.isEmpty()}" class="mb-4">
-        <div th:each="imageUrl : ${board.imageUrls}" class="mb-2">
-          <img th:src="${imageUrl}" alt="게시글 이미지" class="img-fluid" style="max-width: 100%; height: auto;">
-        </div>
-      </div>
 
       <!-- 목록, 수정, 삭제 버튼 -->
       <div class="d-flex justify-content-between">

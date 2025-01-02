@@ -50,7 +50,7 @@ public class BoardService {
                 ));
     }
 
-    public void addBoard(BoardRequestDTO boardRequest, User user, List<MultipartFile> images) throws IOException {
+    public void addBoard(BoardRequestDTO boardRequest, User user) throws IOException {
 
         validateAddBoardRequest(boardRequest);
 
@@ -63,21 +63,6 @@ public class BoardService {
 
         boardRepository.save(board);
 
-        if (images != null && images.size() > 3) {
-            throw new IllegalArgumentException("이미지는 최대 3개까지만 첨부할 수 있습니다.");
-        }
-
-        // 이미지 업로드 및 DB 저장
-        if (images != null && !images.isEmpty()) {
-            List<String> uploadedUrls = s3Service.uploadFiles(images); // S3에 업로드
-
-            for (String url : uploadedUrls) {
-                ImageFile imageFile = new ImageFile();
-                imageFile.setBoard(board); // 게시글과 연관 설정
-                imageFile.setImageUrl(url); // 업로드된 이미지 URL 저장
-                imageFileRepository.save(imageFile); // DB에 저장
-            }
-        }
     }
 
     private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
