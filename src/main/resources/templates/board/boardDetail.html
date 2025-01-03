@@ -23,7 +23,17 @@
     <div class="col-md-10">
 
       <!-- 카테고리 -->
-      <span th:text="${boardCategory}"></span>
+      <h6>
+        <th:block th:each="category : ${boardCategories}">
+          <th:block th:if="${category.key == board.mainCategory}">
+            <th:block th:each="subcategory : ${category.value}">
+                <span th:if="${subcategory.name() == board.subCategory}"
+                      th:text="${subcategory.mainCateName + ' > ' + subcategory.subCateName}">
+                </span>
+            </th:block>
+          </th:block>
+        </th:block>
+      </h6>
 
       <!-- 게시글 제목 -->
       <h3 th:text="${board.title}"></h3>

@@ -23,9 +23,9 @@ public class BoardResponseDTO {
     private String content;
     private int viewCount;
     private LocalDateTime createDate;
-    private int categoryBoardNo;
 
-    private List<String> imageUrls; // 이미지 URL 리스트
+    private int categoryBoardNo;
+    private List<String> imageUrls;
 
 
 }

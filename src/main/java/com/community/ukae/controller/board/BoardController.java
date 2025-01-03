@@ -15,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,7 +43,7 @@ public class BoardController {
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
 
         List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
-        model.addAttribute("boards",boardResponse);
+        model.addAttribute("boards", boardResponse);
 
         return "board/boardList";
 
@@ -63,12 +62,17 @@ public class BoardController {
         }
         model.addAttribute("user", user);
 
+        // subCategory 를 Enum 객체로 매핑
+        BoardCategory boardCategory = BoardCategory.valueOf(subCategory);
+
         BoardRequestDTO boardRequest = new BoardRequestDTO();
         boardRequest.setMainCategory(mainCategory);
-        boardRequest.setSubCategory(subCategory);
+        boardRequest.setSubCategory(boardCategory.name());
         boardRequest.setNickname(user.getNickname());
 
         model.addAttribute("boardRequest", boardRequest);
+        model.addAttribute("subCategory", boardCategory);
+
         model.addAttribute("boardCategories", boardService.getAllCategories());
 
         return "board/addBoardForm";
@@ -91,7 +95,6 @@ public class BoardController {
             return "redirect:/user/login";
         }
 
-
         try {
             boardService.addBoard(boardRequest, user); // 서비스 호출
         } catch (IllegalArgumentException | IOException e) {
@@ -100,8 +103,8 @@ public class BoardController {
             return "board/addBoardForm";
         }
 
-        return "redirect:/board/boardList?mainCategory=" + UrlEncodeUtil.encode(boardRequest.getMainCategory()) +
-                "&subCategory=" + UrlEncodeUtil.encode(boardRequest.getSubCategory());
+        return "redirect:/board/boardList?mainCategory=" + boardRequest.getMainCategory() +
+                "&subCategory=" + boardRequest.getSubCategory();
     }
 
 
@@ -114,10 +117,8 @@ public class BoardController {
 
         BoardResponseDTO  boardResponse  = boardService.findBoardByBoardNo(boardNo);
 
-        model.addAttribute("board",boardResponse );
+        model.addAttribute("board", boardResponse);
         model.addAttribute("boardCategories", boardService.getAllCategories());
-        model.addAttribute("boardCategory", boardResponse.getMainCategory() + " > " + boardResponse.getSubCategory());
-
         return "board/boardDetail";
 
     }

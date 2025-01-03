@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -31,9 +30,9 @@ public class BoardService {
 
     // mainCategory와 subCategory에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
-        return Arrays.stream(BoardCategory.values())
+        return Arrays.stream(BoardCategory.values()) // 모든 Enum 상수를 배열로 반환 [NOTICE, ... , BASEBALL, SOCCER]
                 .filter(category -> category.getMainCategory().equals(mainCategory) &&
-                        category.getSubCategory().equals(subCategory))
+                        category.name().equals(subCategory))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category"));
     }
@@ -52,8 +51,6 @@ public class BoardService {
 
     public void addBoard(BoardRequestDTO boardRequest, User user) throws IOException {
 
-        validateAddBoardRequest(boardRequest);
-
         Board board = new Board();
         board.setMainCategory(boardRequest.getMainCategory());
         board.setSubCategory(boardRequest.getSubCategory());
@@ -63,15 +60,6 @@ public class BoardService {
 
         boardRepository.save(board);
 
-    }
-
-    private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
-        if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
-            throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
-        }
-        if (boardRequest.getContent() == null || boardRequest.getContent().length() < 5 || boardRequest.getContent().length() > 2000) {
-            throw new IllegalArgumentException("내용은 최소 5자 이상, 2000자 이하이어야 합니다.");
-        }
     }
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
@@ -106,6 +94,7 @@ public class BoardService {
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new NoSuchElementException("해당 게시글을 찾을 수 없습니다."));
 
+
         // 이미지 URL 리스트 가져오기
         List<String> imageUrls = imageFileRepository.findByBoard_BoardNo(boardNo)
                 .stream()
@@ -121,7 +110,7 @@ public class BoardService {
                 .content(board.getContent())
                 .viewCount(board.getViewCount())
                 .createDate(board.getCreateDate())
-                .imageUrls(imageUrls) // 이미지 URL 리스트 설정
+                .imageUrls(imageUrls)
                 .build();
 
     }

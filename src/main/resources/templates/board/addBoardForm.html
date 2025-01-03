@@ -19,8 +19,7 @@
             font-weight: bold;
         }
 
-        #subCategoryDropdownButton,
-        #boardTagDropdownButton {
+        #subCategoryDropdownButton{
             width: 150px;
         }
 
@@ -42,25 +41,25 @@
                 <!-- 카테고리 -->
                 <div class="mb-4">
                     <div class="mainCategory">
-                        <p id="mainCategoryText" class="board-mainCategoryName mb-2 me-3" th:field="*{mainCategory}"
-                           th:text="*{mainCategory}"></p>
+                        <p id="mainCategoryText" class="board-mainCategoryName mb-2 me-3"
+                           th:text="${subCategory.mainCateName}"></p>
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <!-- 카테고리 드롭다운 -->
                         <div class="dropdown me-3">
                             <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
                                     id="subCategoryDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
-                                    th:field="*{subCategory}" th:text="*{subCategory} ? *{subCategory} : '카테고리 선택'">
+                                    th:text="${subCategory.subCateName} ? ${subCategory.subCateName} : '카테고리 선택'">
                                 카테고리 선택
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="subCategoryDropdownButton">
-                                <th:block th:each="mainCategoryEntry : ${boardCategories}">
-                                    <th:block th:each="category : ${mainCategoryEntry.value}">
+                                <th:block th:each="mainCategory : ${boardCategories}">
+                                    <th:block th:each="category : ${mainCategory.value}">
                                         <li>
                                             <a class="dropdown-item" href="#"
                                                th:data-main-category="${category.mainCategory}"
-                                               th:data-sub-category="${category.subCategory}"
-                                               th:text="${category.subCategory}"
+                                               th:data-sub-category="${category.name()}"
+                                               th:text="${category.subCateName}"
                                                onclick="selectSubCategory(this)">
                                             </a>
                                         </li>
@@ -107,14 +106,15 @@
     $(document).ready(function () {
         // Summernote 초기화
         $('#content').summernote({
-            height: 300, // 에디터 높이
+            height: 300,
+            disableResizeEditor: true, // 리사이즈 비활성화
             lang: 'ko-KR', // 언어 설정
-                toolbar: [
-                    ['style', ['bold', 'italic', 'underline', 'clear']], // 텍스트 스타일
-                    ['para', ['ul', 'ol']], // 리스트와 문단 정렬
-                    ['insert', ['link', 'picture']], // 링크 및 이미지 삽입
-                    ['view', ['fullscreen', 'help']] // 전체 화면 및 도움말
-                ],
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']], // 텍스트 스타일
+                ['para', ['ul', 'ol']], // 리스트와 문단 정렬
+                ['insert', ['link', 'picture']], // 링크 및 이미지 삽입
+                ['view', ['fullscreen', 'help']] // 전체 화면 및 도움말
+            ],
             callbacks: {
                 // 이미지 업로드 콜백
                 onImageUpload: function (files) {
@@ -147,18 +147,18 @@
                 }
             });
         }
-
-        // 서브 카테고리 선택 함수
-        function selectSubCategory(element) {
-            const selectedSubCategory = element.getAttribute("data-sub-category");
-            const selectedMainCategory = element.getAttribute("data-main-category");
-
-            // 서브 카테고리 업데이트
-            document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategory;
-            document.getElementById("subCategory").value = selectedSubCategory;
-            document.getElementById("mainCategory").value = selectedMainCategory;
-        }
     });
+
+    // 서브 카테고리 선택 함수
+    function selectSubCategory(element) {
+        const selectedSubCategory = element.getAttribute("data-sub-category");
+        const selectedMainCategory = element.getAttribute("data-main-category");
+
+        // 서브 카테고리 업데이트
+        document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategory;
+        document.getElementById("subCategory").value = selectedSubCategory;
+        document.getElementById("mainCategory").value = selectedMainCategory;
+    }
 </script>
 </body>
 </html>

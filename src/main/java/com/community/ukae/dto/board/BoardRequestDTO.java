@@ -20,7 +20,6 @@ public class BoardRequestDTO {
     private int boardNo;
 
     private String mainCategory;
-    @NotBlank(message = "카테고리는 필수 항목입니다.")
     private String subCategory;
 
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
@@ -37,6 +36,5 @@ public class BoardRequestDTO {
     private int categoryBoardNo;
 
     private List<MultipartFile> images;
-
 
 }

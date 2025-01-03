@@ -63,12 +63,12 @@
             <div class="row justify-content-center">
                 <div class="col-md-2" th:each="categories : ${boardCategories}">
                     <!-- 대분류 출력 -->
-                    <h5 class="fw-bold title-board" th:text="${categories.key}"></h5>
+                    <h5 class="fw-bold title-board" th:text="${categories.value[0].mainCateName}"></h5>
                     <ul class="list-board">
                         <!-- 소분류 출력 -->
                         <li th:each="subcategory : ${categories.value}">
-                            <a th:href="@{/board/boardList(mainCategory=${categories.key}, subCategory=${subcategory.subCategory})}"
-                               th:text="${subcategory.subCategory}"></a>
+                            <a th:href="@{/board/boardList(mainCategory=${subcategory.mainCategory}, subCategory=${subcategory.name()})}"
+                               th:text="${subcategory.subCateName}"></a>
                         </li>
                     </ul>
                 </div>
