@@ -51,6 +51,8 @@ public class BoardService {
 
     public void addBoard(BoardRequestDTO boardRequest, User user) throws IOException {
 
+        validateAddBoardRequest(boardRequest);
+
         Board board = new Board();
         board.setMainCategory(boardRequest.getMainCategory());
         board.setSubCategory(boardRequest.getSubCategory());
@@ -62,14 +64,22 @@ public class BoardService {
 
     }
 
+    private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
+        if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
+            throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
+        }
+        // HTML 태그를 제거한 순수 텍스트 추출
+        String plainContent = boardRequest.getContent().replaceAll("<[^>]*>", "").trim();
+
+        if (plainContent.length() < 5 || plainContent.length() > 2000) {
+            throw new IllegalArgumentException("내용은 최소 5자 이상, 2000자 이하이어야 합니다.");
+        }
+    }
+
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
     public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
 
         List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
-
-        for (Object[] row : rows) {
-            System.out.println("Row Data: " + Arrays.toString(row));
-        }
 
         List<BoardResponseDTO> boards = new ArrayList<>();
         for (Object[] row : rows) {
@@ -93,7 +103,6 @@ public class BoardService {
     public BoardResponseDTO findBoardByBoardNo(int boardNo) {
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new NoSuchElementException("해당 게시글을 찾을 수 없습니다."));
-
 
         // 이미지 URL 리스트 가져오기
         List<String> imageUrls = imageFileRepository.findByBoard_BoardNo(boardNo)

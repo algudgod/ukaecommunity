@@ -77,14 +77,17 @@
                 <div class="mb-3">
                     <input type="text" id="title" name="title" class="form-control" placeholder="제목을 입력하세요"
                            th:field="*{title}" required>
-                    <div th:if="${titleError}" class="error-message" th:text="${titleError}"></div>
+                </div>
+
+                <!-- 유효성 결과 -->
+                <div class="mb-1">
+                    <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
                 </div>
 
                 <!-- 내용 입력 -->
                 <div class="mb-3">
                     <textarea id="content" name="content" class="form-control" rows="10" placeholder="내용을 입력하세요"
                               th:field="*{content}" required></textarea>
-                    <div th:if="${contentError}" class="error-message" th:text="${contentError}"></div>
                 </div>
 
                 <!-- 등록 버튼 -->
@@ -104,23 +107,39 @@
 
 <script>
     $(document).ready(function () {
+
         // Summernote 초기화
         $('#content').summernote({
             height: 300,
             disableResizeEditor: true, // 리사이즈 비활성화
             lang: 'ko-KR', // 언어 설정
             toolbar: [
-                ['style', ['bold', 'italic', 'underline', 'clear']], // 텍스트 스타일
-                ['para', ['ul', 'ol']], // 리스트와 문단 정렬
-                ['insert', ['link', 'picture']], // 링크 및 이미지 삽입
-                ['view', ['fullscreen', 'help']] // 전체 화면 및 도움말
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['para', ['ul', 'ol']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'help']]
             ],
             callbacks: {
                 // 이미지 업로드 콜백
                 onImageUpload: function (files) {
                     uploadImages(files); // 올바른 함수 호출
+                },
+                onChange: function(contents) {
+                    $('#content').val(contents); // Summernote 내용을 hidden textarea에 동기화
                 }
             }
+        });
+
+        // 서버에서 전달된 content 값을 Summernote에 설정
+        const initialContent = $('#content').val();
+        if (initialContent) {
+            $('#content').summernote('code', initialContent); // 기존 내용을 Summernote 에 설정
+        }
+
+        // Form 제출 시 Summernote 내용을 <textarea>에 동기화
+        $('form').on('submit', function () {
+            const content = $('#content').summernote('code'); // Summernote의 HTML 내용 가져오기
+            $('#content').val(content); // <textarea>에 동기화
         });
 
         // 이미지 업로드 함수

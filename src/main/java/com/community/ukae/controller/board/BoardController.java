@@ -80,15 +80,9 @@ public class BoardController {
 
     // 게시글 쓰기
     @PostMapping("addBoard")
-    public String addBoard(@Valid BoardRequestDTO boardRequest,
-                           BindingResult result,
+    public String addBoard(BoardRequestDTO boardRequest,
                            HttpSession session,
                            Model model) {
-
-        if (result.hasErrors()) {
-            model.addAttribute("boardRequest", boardRequest);
-            return "board/addBoardForm";
-        }
 
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -99,9 +93,14 @@ public class BoardController {
             boardService.addBoard(boardRequest, user); // 서비스 호출
         } catch (IllegalArgumentException | IOException e) {
             model.addAttribute("errorMessage", e.getMessage());
+            BoardCategory boardCategory = BoardCategory.valueOf(boardRequest.getSubCategory());
+            model.addAttribute("subCategory", boardCategory);
             model.addAttribute("boardRequest", boardRequest);
             return "board/addBoardForm";
         }
+
+        System.out.println("Received content: " + boardRequest.getContent());
+
 
         return "redirect:/board/boardList?mainCategory=" + boardRequest.getMainCategory() +
                 "&subCategory=" + boardRequest.getSubCategory();
