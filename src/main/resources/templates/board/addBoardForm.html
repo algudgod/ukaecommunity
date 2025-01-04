@@ -138,8 +138,9 @@
 
         // Form 제출 시 Summernote 내용을 <textarea>에 동기화
         $('form').on('submit', function () {
-            const content = $('#content').summernote('code'); // Summernote의 HTML 내용 가져오기
-            $('#content').val(content); // <textarea>에 동기화
+            const content = $('#content').summernote('code'); // Summernote 의 HTML 내용 가져오기
+            const plainTextContent = $('<div>').html(content).text().trim(); // HTML 태그 제거 후 텍스트만 추출
+            $('#content').val(plainTextContent); // <textarea>에 동기화
         });
 
         // 이미지 업로드 함수

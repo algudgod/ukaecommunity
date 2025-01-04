@@ -99,13 +99,9 @@ public class BoardController {
             return "board/addBoardForm";
         }
 
-        System.out.println("Received content: " + boardRequest.getContent());
-
-
         return "redirect:/board/boardList?mainCategory=" + boardRequest.getMainCategory() +
                 "&subCategory=" + boardRequest.getSubCategory();
     }
-
 
     // 게시글 상세 조회
     @GetMapping("detail/{boardNo}")
