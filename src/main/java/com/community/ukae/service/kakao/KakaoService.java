@@ -90,7 +90,7 @@ public class KakaoService {
             return "redirect:/";
         } else {
             logger.warn("미가입 사용자입니다.");
-            String kakaoLoginImageUrl = s3Service.getFileUrl("kakao_login_medium_narrow.png");
+            String kakaoLoginImageUrl = s3Service.getFileUrl("common/kakao_login_medium_narrow.png");
             model.addAttribute("kakaoLoginImageUrl", kakaoLoginImageUrl);
             model.addAttribute("error", "가입된 정보가 없습니다.");
             return "user/login";

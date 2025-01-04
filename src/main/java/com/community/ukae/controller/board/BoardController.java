@@ -5,19 +5,17 @@ import com.community.ukae.dto.board.BoardResponseDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.service.board.BoardService;
-import com.community.ukae.utils.UrlEncodeUtil;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("board")
@@ -110,11 +108,14 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
-        BoardResponseDTO  boardResponse  = boardService.findBoardByBoardNo(boardNo);
-
-        model.addAttribute("board", boardResponse);
-        model.addAttribute("boardCategories", boardService.getAllCategories());
-        return "board/boardDetail";
+        try {
+            BoardResponseDTO boardResponse = boardService.findBoardByBoardNo(boardNo);
+            model.addAttribute("board", boardResponse);
+            model.addAttribute("boardCategories", boardService.getAllCategories());
+            return "board/boardDetail";
+        } catch (NoSuchElementException e) {
+            return "redirect:/error/notFound";
+        }
 
     }
 }

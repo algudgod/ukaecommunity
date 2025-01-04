@@ -28,7 +28,7 @@
           <th:block th:if="${category.key == board.mainCategory}">
             <th:block th:each="subcategory : ${category.value}">
                 <span th:if="${subcategory.name() == board.subCategory}"
-                      th:text="${subcategory.mainCateName + ' > ' + subcategory.subCateName}">
+                      th:text="${subcategory.subCateName + ' 카테고리'}">
                 </span>
             </th:block>
           </th:block>
