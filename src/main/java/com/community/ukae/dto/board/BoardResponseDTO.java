@@ -27,5 +27,7 @@ public class BoardResponseDTO {
     private int categoryBoardNo;
     private List<String> imageUrls;
 
+    private String tag;
+
 
 }

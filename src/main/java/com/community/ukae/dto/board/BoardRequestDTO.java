@@ -37,4 +37,6 @@ public class BoardRequestDTO {
 
     private List<MultipartFile> images;
 
+    private String tag;
+
 }

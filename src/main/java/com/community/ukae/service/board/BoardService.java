@@ -6,6 +6,7 @@ import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.imageFile.ImageFile;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
+import com.community.ukae.enums.BoardTag;
 import com.community.ukae.repository.board.BoardRepository;
 import com.community.ukae.repository.imageFile.ImageFileRepository;
 import com.community.ukae.service.s3.S3Service;
@@ -56,6 +57,7 @@ public class BoardService {
         Board board = new Board();
         board.setMainCategory(boardRequest.getMainCategory());
         board.setSubCategory(boardRequest.getSubCategory());
+        board.setTag(boardRequest.getTag());
         board.setTitle(boardRequest.getTitle());
         board.setContent(boardRequest.getContent());
         board.setUser(user);
@@ -93,6 +95,7 @@ public class BoardService {
             boardResponse.setContent((String) row[6]);
             boardResponse.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
             boardResponse.setViewCount(((Number) row[8]).intValue());
+            boardResponse.setTag(BoardTag.getTagNameOrDefault((String) row[9]));
 
             boards.add(boardResponse);
         }
@@ -120,6 +123,7 @@ public class BoardService {
                 .viewCount(board.getViewCount())
                 .createDate(board.getCreateDate())
                 .imageUrls(imageUrls)
+                .tag(BoardTag.getTagNameOrDefault(board.getTag()))
                 .build();
 
     }

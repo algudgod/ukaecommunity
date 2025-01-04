@@ -4,6 +4,7 @@ import com.community.ukae.dto.board.BoardRequestDTO;
 import com.community.ukae.dto.board.BoardResponseDTO;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
+import com.community.ukae.enums.BoardTag;
 import com.community.ukae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ public class BoardController {
     @GetMapping("addBoardForm")
     public String addBoardForm(@RequestParam String mainCategory,
                                @RequestParam String subCategory,
+                               @RequestParam(required = false) String tag,
                                HttpSession session,
                                Model model) {
 
@@ -60,16 +62,23 @@ public class BoardController {
         }
         model.addAttribute("user", user);
 
-        // subCategory 를 Enum 객체로 매핑
+        // subCategory 값을 BoardCategory Enum 매핑
         BoardCategory boardCategory = BoardCategory.valueOf(subCategory);
+        // tag 값을 BoardTag Enum 매핑 (null 허용)
+        BoardTag boardTag = (tag != null && !tag.isEmpty())
+                ? BoardTag.valueOf(tag)
+                : null;
 
         BoardRequestDTO boardRequest = new BoardRequestDTO();
         boardRequest.setMainCategory(mainCategory);
         boardRequest.setSubCategory(boardCategory.name());
+        boardRequest.setTag(boardTag != null ? boardTag.name() : null);
         boardRequest.setNickname(user.getNickname());
 
         model.addAttribute("boardRequest", boardRequest);
         model.addAttribute("subCategory", boardCategory);
+        model.addAttribute("tag", boardTag);
+        model.addAttribute("tags", BoardTag.values());
 
         model.addAttribute("boardCategories", boardService.getAllCategories());
 

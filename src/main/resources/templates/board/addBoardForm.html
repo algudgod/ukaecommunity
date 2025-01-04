@@ -19,7 +19,8 @@
             font-weight: bold;
         }
 
-        #subCategoryDropdownButton{
+        #subCategoryDropdownButton,
+        #tagDropdownButton{
             width: 150px;
         }
 
@@ -58,7 +59,8 @@
                                         <li>
                                             <a class="dropdown-item" href="#"
                                                th:data-main-category="${category.mainCategory}"
-                                               th:data-sub-category="${category.name()}"
+                                               th:data-sub-category="${category.subCateName}"
+                                               th:data-sub-category-name="${category.name()}"
                                                th:text="${category.subCateName}"
                                                onclick="selectSubCategory(this)">
                                             </a>
@@ -67,11 +69,35 @@
                                 </th:block>
                             </ul>
                         </div>
+
+                        <!--말머리 드롭다운 -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
+                                    id="tagDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
+                                    th:text="${tag != null ? tag.tagName : '말머리 선택'}">
+                            </button>
+
+                            <ul class="dropdown-menu" aria-labelledby="tagDropdownButton">
+                                <th:block th:each="boardTag : ${tags}">
+                                    <li>
+                                        <a class="dropdown-item" href="#"
+                                           th:data-tag-display-name="${boardTag.tagName}"
+                                           th:data-tag-name="${boardTag.name()}"
+                                           th:data-board-category="${boardTag.boardCategory}"
+                                           th:text="${boardTag.tagName}"
+                                           onclick="selectTag(this)">
+                                        </a>
+                                    </li>
+                                </th:block>
+                            </ul>
+                        </div>
+
                     </div>
                 </div>
                 <!-- Hidden fields -->
                 <input type="hidden" th:field="*{mainCategory}"/>
                 <input type="hidden" th:field="*{subCategory}"/>
+                <input type="hidden" th:field="*{tag}"/>
 
                 <!-- 제목 입력 -->
                 <div class="mb-3">
@@ -106,8 +132,83 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 
 <script>
-    $(document).ready(function () {
 
+    document.addEventListener("DOMContentLoaded", function () {
+        // 페이지 로드 시 초기 카테고리 설정 및 말머리 필터링
+        const initialSubCategory = document.getElementById("subCategory").value; // 초기 subCategory 값 가져오기
+        if (initialSubCategory) {
+            console.log("Initial SubCategory:", initialSubCategory);
+            filterTagsBySubCategory(initialSubCategory); // 초기 태그 필터링
+        }
+
+        // Form 제출 시 Summernote 내용을 동기화
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function () {
+            const contentElement = document.getElementById("content");
+            const content = contentElement.value; // Summernote HTML 내용 가져오기
+            const plainTextContent = content.replace(/<[^>]*>/g, '').trim(); // HTML 태그 제거
+            contentElement.value = plainTextContent; // 동기화
+        });
+
+        // Summernote 초기화
+        initializeSummernote();
+    });
+
+    // 서브 카테고리 선택 함수
+    function selectSubCategory(element) {
+        const selectedMainCategory = element.getAttribute("data-main-category"); // 메인 카테고리
+        const selectedSubCategoryDisplayName = element.getAttribute("data-sub-category"); // 한글 값
+        const selectedSubCategoryName = element.getAttribute("data-sub-category-name"); // 영어 값
+
+        // 드롭다운 버튼 업데이트
+        document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategoryDisplayName; // 한글 값 표시
+        document.getElementById("subCategory").value = selectedSubCategoryName; // 영어 값 저장
+        document.getElementById("mainCategory").value = selectedMainCategory; // 메인 카테고리 저장
+
+        console.log("Selected SubCategory (Display Name):", selectedSubCategoryDisplayName);
+        console.log("Selected SubCategory (DB Name):", selectedSubCategoryName);
+
+        // 태그 필터링
+        filterTagsBySubCategory(selectedSubCategoryName);
+    }
+
+    // 말머리 선택 함수
+    function selectTag(element) {
+        const selectedTagName = element.getAttribute("data-tag-name"); // 영어 (name())
+        const selectedTagDisplayName = element.getAttribute("data-tag-display-name"); // 한글 (tagName)
+
+        // 말머리 드롭다운 업데이트
+        document.getElementById("tagDropdownButton").innerText = selectedTagDisplayName; // 화면에는 한글 값 표시
+        document.getElementById("tag").value = selectedTagName; // 서버로 보낼 값은 영어로 설정
+
+        console.log("Selected tag (Display Name):", selectedTagDisplayName);
+        console.log("Selected tag (DB Name):", selectedTagName);
+    }
+
+    // 카테고리에 해당하는 태그 필터링 함수
+    function filterTagsBySubCategory(subCategoryName) {
+        const tagItems = document.querySelectorAll("#tagDropdownButton + .dropdown-menu .dropdown-item");
+
+        tagItems.forEach(item => {
+            const itemCategory = item.getAttribute("data-board-category");
+
+            console.log("Comparing subCategory:", subCategoryName, "with tagCategory:", itemCategory);
+
+            if (itemCategory === subCategoryName) {
+                console.log("Match found:", itemCategory);
+                item.style.display = ""; // 해당 카테고리 태그 보이기
+            } else {
+                console.log("No match:", itemCategory);
+                item.style.display = "none"; // 다른 카테고리 태그 숨기기
+            }
+        });
+
+        // 태그 초기화
+        document.getElementById("tagDropdownButton").innerText = "말머리 선택";
+        document.getElementById("tag").value = "";
+    }
+
+    function initializeSummernote() {
         // Summernote 초기화
         $('#content').summernote({
             height: 300,
@@ -120,9 +221,8 @@
                 ['view', ['fullscreen', 'help']]
             ],
             callbacks: {
-                // 이미지 업로드 콜백
                 onImageUpload: function (files) {
-                    uploadImages(files); // 올바른 함수 호출
+                    uploadImages(files); // 이미지 업로드 콜백 함수
                 },
                 onChange: function(contents) {
                     $('#content').val(contents); // Summernote 내용을 hidden textarea에 동기화
@@ -130,55 +230,36 @@
             }
         });
 
-        // 서버에서 전달된 content 값을 Summernote에 설정
+        // 서버에서 전달된 초기 내용 설정 (필요시)
         const initialContent = $('#content').val();
         if (initialContent) {
-            $('#content').summernote('code', initialContent); // 기존 내용을 Summernote 에 설정
+            $('#content').summernote('code', initialContent);
         }
-
-        // Form 제출 시 Summernote 내용을 <textarea>에 동기화
-        $('form').on('submit', function () {
-            const content = $('#content').summernote('code'); // Summernote 의 HTML 내용 가져오기
-            const plainTextContent = $('<div>').html(content).text().trim(); // HTML 태그 제거 후 텍스트만 추출
-            $('#content').val(plainTextContent); // <textarea>에 동기화
-        });
-
-        // 이미지 업로드 함수
-        function uploadImages(files) {
-            let data = new FormData();
-            for (let i = 0; i < files.length; i++) {
-                data.append("files", files[i]); // 다중 파일 추가
-            }
-
-            $.ajax({
-                url: '/api/board/uploadImages', // 이미지 업로드 API 경로
-                type: 'POST',
-                data: data,
-                contentType: false,
-                processData: false,
-                success: function (urls) {
-                    // 서버에서 반환된 URL 배열로 이미지 삽입
-                    urls.forEach(function (url) {
-                        $('#content').summernote('insertImage', url);
-                    });
-                },
-                error: function () {
-                    alert("이미지 업로드 실패!");
-                }
-            });
-        }
-    });
-
-    // 서브 카테고리 선택 함수
-    function selectSubCategory(element) {
-        const selectedSubCategory = element.getAttribute("data-sub-category");
-        const selectedMainCategory = element.getAttribute("data-main-category");
-
-        // 서브 카테고리 업데이트
-        document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategory;
-        document.getElementById("subCategory").value = selectedSubCategory;
-        document.getElementById("mainCategory").value = selectedMainCategory;
     }
+
+    // 이미지 업로드 함수
+    function uploadImages(files) {
+        const data = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            data.append("files", files[i]); // 다중 파일 추가
+        }
+
+        fetch('/api/board/uploadImages', {
+            method: 'POST',
+            body: data,
+        })
+            .then(response => response.json())
+            .then(urls => {
+                urls.forEach(url => {
+                    console.log("Image uploaded:", url);
+                });
+            })
+            .catch(error => {
+                console.error("Image upload failed:", error);
+                alert("이미지 업로드 실패!");
+            });
+    }
+
 </script>
 </body>
 </html>

@@ -27,7 +27,8 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "u.nickname, " +
             "b.content, " +
             "b.create_date, " +
-            "b.view_count " +
+            "b.view_count, " +
+            "b.tag "+
             "FROM board b " +
             "JOIN user u ON b.login_id = u.login_id " +
             "WHERE b.main_category = :mainCategory " +
