@@ -94,6 +94,8 @@ public class BoardController {
             return "redirect:/user/login";
         }
 
+        logger.info("서버로 전달된 tag 값: {}", boardRequest.getTag());
+
         try {
             boardService.addBoard(boardRequest, user); // 서비스 호출
         } catch (IllegalArgumentException | IOException e) {
@@ -126,8 +128,40 @@ public class BoardController {
     }
 
     // 게시글 수정 form
+    @GetMapping("editBoard/{boardNo}")
+    public String editBoardForm(@PathVariable int boardNo,
+                                HttpSession session, Model model){
+        // 사용자 인증 체크
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", user);
 
+        // 게시글 조회
+        BoardResponseDTO boardResponse = boardService.findBoardByBoardNo(boardNo);
+        if(boardResponse == null) {
+            logger.warn("게시글을 찾을 수 없음: boardNo={}", boardNo);
+            return "redirect:/error/notFound";
+        }
+        // 수정 폼 데이터
+        BoardRequestDTO boardRequest = boardService.getEditBoardForm(boardNo, user);
 
+        BoardCategory boardCategory = BoardCategory.valueOf(boardResponse.getSubCategory());
+        BoardTag boardTag = (boardResponse.getTag() != null) ? BoardTag.valueOf(boardResponse.getTag()) : null;
+        logger.info("게시글 수정 폼 초기화: boardNo={}, subCategory={}, tag={}", boardNo, boardCategory, boardTag);
+
+        model.addAttribute("board", boardResponse);
+        model.addAttribute("boardRequest", boardRequest);
+        model.addAttribute("subCategory", boardCategory);
+        model.addAttribute("boardCategories", boardService.getAllCategories());
+        model.addAttribute("tag", boardTag);
+        model.addAttribute("tags", BoardTag.values());
+
+        logger.info("게시글 수정 폼 가져오기 성공: boardNo={}", boardNo);
+
+        return "board/editBoardForm";
+    }
 
 
 }

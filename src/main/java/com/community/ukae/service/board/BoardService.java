@@ -57,6 +57,7 @@ public class BoardService {
                 ));
     }
 
+    // 게시글 등록
     public void addBoard(BoardRequestDTO boardRequest, User user) throws IOException {
         logger.info("게시글 등록 요청: MainCategory={}, Title={}", boardRequest.getMainCategory(), boardRequest.getTitle());
 
@@ -94,6 +95,28 @@ public class BoardService {
         }
     }
 
+    // 게시글 수정 폼 데이터 생성
+    public BoardRequestDTO getEditBoardForm(int boardNo, User user) {
+        BoardResponseDTO board = findBoardByBoardNo(boardNo);
+
+        if (!board.getNickname().equals(user.getNickname())) {
+            logger.warn("수정 권한 없음: boardNo={}, userNickname={}, boardNickname={}",
+                    boardNo, user.getNickname(), board.getNickname());
+            throw new IllegalArgumentException("수정 권한이 없습니다.");
+        }
+
+        BoardRequestDTO boardRequest = new BoardRequestDTO();
+        boardRequest.setMainCategory(board.getMainCategory());
+        boardRequest.setSubCategory(board.getSubCategory());
+        boardRequest.setTag(board.getTag() != null ? board.getTag() : null);
+        boardRequest.setTitle(board.getTitle());
+        boardRequest.setContent(board.getContent());
+
+        logger.info("수정 권한 확인 및 BoardRequest 생성 완료: boardNo={}", boardNo);
+
+        return boardRequest;
+    }
+
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
     public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
         logger.info("카테고리별 게시글 목록 조회 요청: MainCategory={}, SubCategory={}", mainCategory, subCategory);
@@ -114,7 +137,8 @@ public class BoardService {
             boardResponse.setContent((String) row[6]);
             boardResponse.setCreateDate(((Timestamp) row[7]).toLocalDateTime());
             boardResponse.setViewCount(((Number) row[8]).intValue());
-            boardResponse.setTag(BoardTag.getTagNameOrDefault((String) row[9]));
+            boardResponse.setTag((String) row[9]); // 수정 폼용 name() 값
+            boardResponse.setTagName(BoardTag.getTagNameOrDefault((String) row[9])); // 리스트/상세 화면용 한글 값
 
             boards.add(boardResponse);
         }
@@ -146,10 +170,10 @@ public class BoardService {
                 .viewCount(board.getViewCount())
                 .createDate(board.getCreateDate())
                 .imageUrls(imageUrls)
-                .tag(BoardTag.getTagNameOrDefault(board.getTag()))
+                .tag(board.getTag())
+                .tagName(BoardTag.getTagNameOrDefault(board.getTag()))
                 .build();
 
     }
-
 
 }

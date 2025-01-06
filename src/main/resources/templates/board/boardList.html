@@ -73,7 +73,7 @@
 
                 <tr class="board-row" th:each="board : ${boards}">
                     <td class="board-CategoryBoardNo" th:text="${board.categoryBoardNo}"></td>
-                    <td class="board-tag" th:text="${board.tag}"></td>
+                    <td class="board-tag" th:text="${board.tagName}"></td>
                     <td class="board-title">
                         <a th:href="@{/board/detail/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
                     </td>

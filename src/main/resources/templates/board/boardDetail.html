@@ -36,7 +36,7 @@
       </h6>
 
       <!-- 게시글 제목 -->
-      <h3 th:text="'[' + ${board.tag} + '] ' + ${board.title}"></h3>
+      <h3 th:text="'[' + ${board.tagName} + '] ' + ${board.title}"></h3>
 
       <!-- 작성자 및 작성일 -->
       <div class="text-muted mb-3">
@@ -60,7 +60,7 @@
         <!-- 수정/삭제 버튼 -->
         <div>
           <a th:if="${user != null and user.nickname == board.nickname}"
-             th:href="@{/boards/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+             th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
              class="btn btn-sm btn-outline-secondary">수정</a>
           <form th:if="${user != null and user.nickname == board.nickname}"
                 th:action="@{/boards/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
@@ -70,6 +70,7 @@
             <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
           </form>
         </div>
+
       </div>
     </div>
   </div>

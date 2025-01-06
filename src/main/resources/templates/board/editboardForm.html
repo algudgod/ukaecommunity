@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+
+    <style>
+        #mainCategoryText {
+            font-weight: bold;
+        }
+
+        #subCategoryDropdownButton,
+        #tagDropdownButton {
+            width: 150px;
+        }
+
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{common/header :: header}"></div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-6">
+
+            <form th:action="@{/board/updateBoard}" th:object="${boardRequest}" method="post"
+                  enctype="multipart/form-data">
+
+                <input type="hidden" th:field="*{boardNo}"/>
+
+                <!-- 카테고리 -->
+                <div class="mb-4">
+                    <div class="mainCategory">
+                        <p id="mainCategoryText" class="board-mainCategoryName mb-2 me-3"
+                           th:text="${subCategory.mainCateName}"></p>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- 카테고리 드롭다운 -->
+                        <div class="dropdown me-3">
+                            <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
+                                    id="subCategoryDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
+                                    th:text="${subCategory.subCateName} ? ${subCategory.subCateName} : '카테고리 선택'">
+                                카테고리 선택
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="subCategoryDropdownButton">
+                                <th:block th:each="mainCategory : ${boardCategories}">
+                                    <th:block th:each="category : ${mainCategory.value}">
+                                        <li>
+                                            <a class="dropdown-item" href="#"
+                                               th:data-main-category="${category.mainCategory}"
+                                               th:data-sub-category="${category.subCateName}"
+                                               th:data-sub-category-name="${category.name()}"
+                                               th:text="${category.subCateName}"
+                                               onclick="selectSubCategory(this)">
+                                            </a>
+                                        </li>
+                                    </th:block>
+                                </th:block>
+                            </ul>
+                        </div>
+
+                        <!-- 말머리 드롭다운 -->
+                        <div class="dropdown">
+                            <button class="btn btn-outline-dark btn-sm dropdown-toggle" type="button"
+                                    id="tagDropdownButton" data-bs-toggle="dropdown" aria-expanded="false"
+                                    th:text="${tag != null ? tag.tagName : '말머리 선택'}">
+                            </button>
+
+                            <ul class="dropdown-menu" aria-labelledby="tagDropdownButton">
+                                <th:block th:each="boardTag : ${tags}">
+                                    <li>
+                                        <a class="dropdown-item" href="#"
+                                           th:data-tag-display-name="${boardTag.tagName}"
+                                           th:data-tag-name="${boardTag.name()}"
+                                           th:data-board-category="${boardTag.boardCategory}"
+                                           th:text="${boardTag.tagName}"
+                                           onclick="selectTag(this)">
+                                        </a>
+                                    </li>
+                                </th:block>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Hidden fields -->
+                <input type="hidden" th:field="*{mainCategory}"/>
+                <input type="hidden" th:field="*{subCategory}"/>
+                <input type="hidden" th:field="*{tag}"/>
+
+                <!-- 제목 입력 -->
+                <div class="mb-3">
+                    <input type="text" id="title" name="title" class="form-control" placeholder="제목을 입력하세요"
+                           th:field="*{title}" required>
+                </div>
+
+                <!-- 유효성 결과 -->
+                <div class="mb-1">
+                    <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+                </div>
+
+                <!-- 내용 입력 -->
+                <div class="mb-3">
+                    <textarea id="content" name="content" class="form-control" rows="10"
+                              th:field="*{content}" required></textarea>
+                </div>
+
+                <!-- 수정 버튼 -->
+                <div class="d-flex justify-content-center">
+                    <button type="submit" class="btn btn-dark me-3">수정</button>
+                    <a th:href="@{/board/detail{boardNo}(boardNo=${board.boardNo})}" class="btn btn-outline-dark">취소</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // 페이지 로드 시 초기 카테고리 설정 및 말머리 필터링
+        const initialSubCategory = document.getElementById("subCategory").value; // 초기 subCategory 값 가져오기
+        const initialTag = document.getElementById("tag").value; // 초기 tag 값 가져오기
+
+        if (initialSubCategory) {
+            console.log("Initial SubCategory:", initialSubCategory);
+            filterTagsBySubCategory(initialSubCategory); // 초기 서브카테고리 필터링
+        }
+        if (initialTag) {
+            console.log("Initial Tag:", initialTag);
+            setTagDropdownValue(initialTag); // 초기 태그 값 설정
+        }
+
+        // Form 제출 시 Summernote 내용을 동기화
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function () {
+            const contentElement = document.getElementById("content");
+            const content = contentElement.value; // Summernote HTML 내용 가져오기
+            const plainTextContent = content.replace(/<[^>]*>/g, '').trim(); // HTML 태그 제거
+            contentElement.value = plainTextContent; // 동기화
+        });
+
+        // Summernote 초기화
+        initializeSummernote();
+    });
+
+    // 서브 카테고리 선택 함수
+    function selectSubCategory(element) {
+        const selectedMainCategory = element.getAttribute("data-main-category"); // 메인 카테고리
+        const selectedSubCategoryDisplayName = element.getAttribute("data-sub-category"); // 한글 값
+        const selectedSubCategoryName = element.getAttribute("data-sub-category-name"); // 영어 값
+
+        // 드롭다운 버튼 업데이트
+        document.getElementById("subCategoryDropdownButton").innerText = selectedSubCategoryDisplayName; // 한글 값 표시
+        document.getElementById("subCategory").value = selectedSubCategoryName; // 영어 값 저장
+        document.getElementById("mainCategory").value = selectedMainCategory; // 메인 카테고리 저장
+
+        console.log("Selected SubCategory (Display Name):", selectedSubCategoryDisplayName);
+        console.log("Selected SubCategory (DB Name):", selectedSubCategoryName);
+
+        // 태그 필터링
+        filterTagsBySubCategory(selectedSubCategoryName);
+    }
+
+    // 말머리 선택 함수
+    function selectTag(element) {
+        const selectedTagName = element.getAttribute("data-tag-name"); // 영어 (name())
+        const selectedTagDisplayName = element.getAttribute("data-tag-display-name"); // 한글 (tagName)
+
+        // 말머리 드롭다운 업데이트
+        document.getElementById("tagDropdownButton").innerText = selectedTagDisplayName; // 화면에는 한글 값 표시
+        document.getElementById("tag").value = selectedTagName; // 서버로 보낼 값은 영어로 설정
+
+        console.log("Selected tag (Display Name):", selectedTagDisplayName);
+        console.log("Selected tag (DB Name):", selectedTagName);
+    }
+
+    // 카테고리에 해당하는 태그 필터링 함수
+    function filterTagsBySubCategory(subCategoryName) {
+        const tagItems = document.querySelectorAll("#tagDropdownButton + .dropdown-menu .dropdown-item");
+
+        tagItems.forEach(item => {
+            const itemCategory = item.getAttribute("data-board-category");
+
+            console.log("Comparing subCategory:", subCategoryName, "with tagCategory:", itemCategory);
+
+            if (itemCategory === subCategoryName) {
+                console.log("Match found:", itemCategory);
+                item.style.display = ""; // 해당 카테고리 태그 보이기
+            } else {
+                console.log("No match:", itemCategory);
+                item.style.display = "none"; // 다른 카테고리 태그 숨기기
+            }
+        });
+
+        // 태그 초기화
+        document.getElementById("tagDropdownButton").innerText = "말머리 선택";
+        document.getElementById("tag").value = "";
+    }
+
+    // 태그 초기값 설정 함수
+  function setTagDropdownValue(tagName) {
+      const tagItems = document.querySelectorAll("#tagDropdownButton + .dropdown-menu .dropdown-item");
+
+      tagItems.forEach(item => {
+          const itemTagName = item.getAttribute("data-tag-name");
+          const itemTagDisplayName = item.getAttribute("data-tag-display-name");
+
+          if (itemTagName === tagName) {
+              // 태그 드롭다운 버튼 업데이트
+              document.getElementById("tagDropdownButton").innerText = itemTagDisplayName; // 한글 태그명 표시
+              document.getElementById("tag").value = itemTagName; // 숨겨진 필드에 영어 태그명 설정
+              console.log("Initial tag set to:", itemTagDisplayName);
+          }
+      });
+  }
+
+    function initializeSummernote() {
+        // Summernote 초기화
+        $('#content').summernote({
+            height: 300,
+            disableResizeEditor: true, // 리사이즈 비활성화
+            lang: 'ko-KR', // 언어 설정
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear']],
+                ['para', ['ul', 'ol']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function (files) {
+                    uploadImages(files); // 이미지 업로드 콜백 함수
+                },
+                onChange: function(contents) {
+                    $('#content').val(contents); // Summernote 내용을 hidden textarea에 동기화
+                }
+            }
+        });
+
+        // 서버에서 전달된 초기 내용 설정 (필요시)
+        const initialContent = $('#content').val();
+        if (initialContent) {
+            $('#content').summernote('code', initialContent);
+        }
+    }
+
+    // 이미지 업로드 함수
+    function uploadImages(files) {
+        const data = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            data.append("files", files[i]); // 다중 파일 추가
+        }
+
+        fetch('/api/board/uploadImages', {
+            method: 'POST',
+            body: data,
+        })
+            .then(response => response.json())
+            .then(urls => {
+                urls.forEach(url => {
+                    console.log("Image uploaded:", url);
+                });
+            })
+            .catch(error => {
+                console.error("Image upload failed:", error);
+                alert("이미지 업로드 실패!");
+            });
+    }
+
+</script>
+</body>
+</html>

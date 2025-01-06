@@ -27,7 +27,8 @@ public class BoardResponseDTO {
     private int categoryBoardNo;
     private List<String> imageUrls;
 
-    private String tag;
+    private String tag;        // 수정 폼용 (name())
+    private String tagName;    // 리스트/상세 화면용 (tagName)
 
 
 }
