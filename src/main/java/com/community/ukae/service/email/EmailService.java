@@ -37,7 +37,7 @@ public class EmailService {
             mailSender.send(mimeMessage);
             logger.info("이메일 발송 성공: {}", to);
         } catch (Exception e) {
-            logger.error("이메일 발송 실패: {}", e.getMessage(), e);
+            logger.error("이메일 발송 실패: to={}, subject={}, 이유={}", to, subject, e.getMessage(), e);
             throw new RuntimeException("이메일 발송에 실패했습니다: " + to, e);
         }
     }
@@ -52,20 +52,22 @@ public class EmailService {
         String token = UUID.randomUUID().toString();  // 고유한 토큰 생성
         long expirationTime = System.currentTimeMillis() + TOKEN_EXPIRATION_TIME;  // 만료 시간 계산
         tokenStorage.put(token, expirationTime);  // 토큰과 만료 시간을 매핑하여 저장
-        logger.info("Generated Token for {}: {}", email, token);  // 토큰 생성 로그
-        return token;  // 생성된 토큰 반환
+        logger.info("토큰 생성 완료 {}", email);
+        return token;
     }
+
     // 토큰 검증
     public void validateToken(String token) {
-        if (!tokenStorage.containsKey(token)) {
+        Long expirationTime = tokenStorage.remove(token); // 삭제와 동시에 만료 시간 가져오기
+        if (expirationTime == null) {
+            logger.warn("토큰 검증 실패 - 유효하지 않은 토큰: {}", token);
             throw new RuntimeException("유효하지 않은 토큰입니다.");
         }
-        long expirationTime = tokenStorage.get(token);  // 토큰의 만료 시간 가져오기
-        if (System.currentTimeMillis() > expirationTime) {  // 현재 시간이 만료 시간을 초과하면
-            tokenStorage.remove(token);  // 만료된 토큰 삭제
+        if (System.currentTimeMillis() > expirationTime) {
+            logger.warn("토큰 검증 실패 - 토큰 만료: {}", token);
             throw new RuntimeException("토큰이 만료되었습니다.");
         }
-        tokenStorage.remove(token);  // 인증 후 토큰 삭제
+        logger.info("토큰 검증 성공: {}", token);
     }
 
     // 이메일 인증 발송

@@ -65,9 +65,7 @@ public class BoardController {
         // subCategory 값을 BoardCategory Enum 매핑
         BoardCategory boardCategory = BoardCategory.valueOf(subCategory);
         // tag 값을 BoardTag Enum 매핑 (null 허용)
-        BoardTag boardTag = (tag != null && !tag.isEmpty())
-                ? BoardTag.valueOf(tag)
-                : null;
+        BoardTag boardTag = (tag != null) ? BoardTag.valueOf(tag) : null;
 
         BoardRequestDTO boardRequest = new BoardRequestDTO();
         boardRequest.setMainCategory(mainCategory);
@@ -125,6 +123,11 @@ public class BoardController {
         } catch (NoSuchElementException e) {
             return "redirect:/error/notFound";
         }
-
     }
+
+    // 게시글 수정 form
+
+
+
+
 }

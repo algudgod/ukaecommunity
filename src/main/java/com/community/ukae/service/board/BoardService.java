@@ -29,13 +29,20 @@ public class BoardService {
     private final ImageFileRepository imageFileRepository;
     private final S3Service s3Service;
 
-    // mainCategory와 subCategory에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
+    // mainCategory 와 subCategory 에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
-        return Arrays.stream(BoardCategory.values()) // 모든 Enum 상수를 배열로 반환 [NOTICE, ... , BASEBALL, SOCCER]
-                .filter(category -> category.getMainCategory().equals(mainCategory) &&
-                        category.name().equals(subCategory))
+        logger.info("카테고리 조회 요청: MainCategory={}, SubCategory={}", mainCategory, subCategory);
+
+        BoardCategory category = Arrays.stream(BoardCategory.values())
+                .filter(cat -> cat.getMainCategory().equals(mainCategory) && cat.name().equals(subCategory))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Invalid category"));
+                .orElseThrow(() -> {
+                    logger.error("유효하지 않은 카테고리: MainCategory={}, SubCategory={}", mainCategory, subCategory); // 예외 발생
+                    return new IllegalArgumentException("Invalid category");
+                });
+
+        logger.info("카테고리 조회 성공: {}", category);
+        return category;
     }
 
     // 모든 BoardCategory 를 mainCategory 기준으로 그룹화하여 반환
@@ -51,23 +58,32 @@ public class BoardService {
     }
 
     public void addBoard(BoardRequestDTO boardRequest, User user) throws IOException {
+        logger.info("게시글 등록 요청: MainCategory={}, Title={}", boardRequest.getMainCategory(), boardRequest.getTitle());
 
         validateAddBoardRequest(boardRequest);
 
-        Board board = new Board();
-        board.setMainCategory(boardRequest.getMainCategory());
-        board.setSubCategory(boardRequest.getSubCategory());
-        board.setTag(boardRequest.getTag());
-        board.setTitle(boardRequest.getTitle());
-        board.setContent(boardRequest.getContent());
-        board.setUser(user);
+        try {
+            Board board = new Board();
+            board.setMainCategory(boardRequest.getMainCategory());
+            board.setSubCategory(boardRequest.getSubCategory());
+            board.setTag(boardRequest.getTag());
+            board.setTitle(boardRequest.getTitle());
+            board.setContent(boardRequest.getContent());
+            board.setUser(user);
 
-        boardRepository.save(board);
+            boardRepository.save(board);
+            logger.info("게시글 저장 성공: BoardNo={}", board.getBoardNo());
+        } catch (Exception e) {
+            logger.error("게시글 저장 실패: {}", e.getMessage());
+            throw e;
+        }
 
     }
 
+    // 게시글 쓰기 유효성 검사
     private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
         if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
+            logger.warn("유효성 검사 실패 - 게시글 제목 유효하지 않음: {}", boardRequest.getTitle());
             throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
         }
         // HTML 태그를 제거한 순수 텍스트 추출
@@ -80,8 +96,11 @@ public class BoardService {
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
     public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
+        logger.info("카테고리별 게시글 목록 조회 요청: MainCategory={}, SubCategory={}", mainCategory, subCategory);
 
         List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
+
+        logger.info("카테고리별 게시글 목록 조회 성공: MainCategory={}, SubCategory={}, 게시글 수={}", mainCategory, subCategory, rows.size());
 
         List<BoardResponseDTO> boards = new ArrayList<>();
         for (Object[] row : rows) {
@@ -104,6 +123,8 @@ public class BoardService {
     }
 
     public BoardResponseDTO findBoardByBoardNo(int boardNo) {
+        logger.info("게시글 조회 요청: BoardNo={}", boardNo);
+
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new NoSuchElementException("해당 게시글을 찾을 수 없습니다."));
 
@@ -112,6 +133,8 @@ public class BoardService {
                 .stream()
                 .map(ImageFile::getImageUrl)
                 .toList();
+
+        logger.info("게시글 조회 성공: BoardNo={}", boardNo);
 
         return BoardResponseDTO.builder()
                 .boardNo(board.getBoardNo())

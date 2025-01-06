@@ -46,7 +46,7 @@ public class UserController {
     @GetMapping("login")
     public String login(Model model) {
 
-        String kakaoLoginImageUrl = s3Service.getFileUrl("kakao_login_medium_narrow.png");
+        String kakaoLoginImageUrl = s3Service.getFileUrl("common/kakao_login_medium_narrow.png");
         model.addAttribute("kakaoLoginImageUrl",kakaoLoginImageUrl);
         return "user/login";
     }

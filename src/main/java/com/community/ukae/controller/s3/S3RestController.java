@@ -5,6 +5,8 @@ import com.community.ukae.repository.user.UserRepository;
 import com.community.ukae.service.s3.S3Service;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/s3")
 public class S3RestController {
+
+    private static final Logger logger = LoggerFactory.getLogger(S3RestController.class);
 
     private final S3Client s3Client; // S3Client로 변경
     private final S3Service s3Service;
@@ -47,20 +51,23 @@ public class S3RestController {
     @PostMapping("/profileUpload")
     public ResponseEntity<String> uploadProfileImage(@RequestParam("file") MultipartFile file, HttpSession session) {
         try {
+            // 로그인된 사용자 확인
             User user = (User) session.getAttribute("user");
             if (user == null) {
                 return ResponseEntity.status(401).body("로그인이 필요합니다.");
             }
 
-            // S3 업로드 및 URL 생성
-            String fileUrl = s3Service.uploadFile(file, user);
-            System.out.println("made fileUrl: " + fileUrl);
+            // 사용자 프로필 업로드 처리
+            String fileUrl = s3Service.uploadUserProfile(file, user);
+            logger.info("프로필 업로드 성공: userId={}, fileUrl={}", user.getLoginId(), fileUrl);
 
             return ResponseEntity.ok(fileUrl);
 
         } catch (IllegalArgumentException e) {
+            logger.warn("프로필 업로드 실패: 잘못된 요청 - {}", e.getMessage());
             return ResponseEntity.badRequest().body("업로드 실패: " + e.getMessage());
         } catch (Exception e) {
+            logger.error("프로필 업로드 실패: 시스템 오류", e);
             return ResponseEntity.status(500).body("파일 업로드 실패: " + e.getMessage());
         }
     }

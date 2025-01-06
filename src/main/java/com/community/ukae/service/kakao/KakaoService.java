@@ -25,27 +25,27 @@ public class KakaoService {
 
     // 카카오 사용자 정보 가져오기
     public KakaoRequestDTO getKakaoUserInfo(OAuth2AuthenticationToken authentication) {
-        OAuth2User oAuth2User = authentication.getPrincipal();
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        Object kakaoAccountObj = attributes.get("kakao_account");
+        try {
+            OAuth2User oAuth2User = authentication.getPrincipal();
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+            Object kakaoAccountObj = attributes.get("kakao_account");
 
-        if (!(kakaoAccountObj instanceof Map)) {
-            throw new RuntimeException("kakao_account 정보가 Map 형태가 아닙니다.");
+            if (!(kakaoAccountObj instanceof Map)) {
+                throw new RuntimeException("kakao_account 정보가 Map 형태가 아닙니다.");
+            }
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoAccountObj;
+
+            String name = (String) kakaoAccount.get("name");
+            String email = (String) kakaoAccount.get("email");
+            String phone = (String) kakaoAccount.get("phone_number");
+            logger.info("카카오 사용자 정보: name={}, email={}", name, email);
+            return new KakaoRequestDTO(name, email, formatPhoneNumber(phone));
+        } catch (Exception e) {
+            logger.error("카카오 사용자 정보 가져오기 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("카카오 사용자 정보를 가져오는 데 실패했습니다.");
         }
-
-        @SuppressWarnings("unchecked")
-        Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoAccountObj;
-
-        String name = (String) kakaoAccount.get("name");
-        String email = (String) kakaoAccount.get("email");
-        String phone = (String) kakaoAccount.get("phone_number");
-
-        return new KakaoRequestDTO(name, email, formatPhoneNumber(phone));
-    }
-
-    // 사용자 가입 여부 확인
-    public boolean isUserAlreadyRegistered(String name, String email) {
-        return userService.findByNameAndEmail(name, email).isPresent();
     }
 
     // 사용자 조회
@@ -56,43 +56,57 @@ public class KakaoService {
 
     // 핸드폰 번호 포맷팅
     private String formatPhoneNumber(String phone) {
-        if (phone == null) return null;
-        if (phone.startsWith("+82")) {
-            return "0" + phone.substring(3).replaceAll("\\s|-", "");
+        if (phone == null) {
+            return null; // 전화번호가 없는 경우
         }
-        return phone.replaceAll("\\s|-", "");
+        // 한국 국제번호 +82를 국내 번호 형식으로 변환
+        if (phone.startsWith("+82")) {
+            phone = "0" + phone.substring(3);
+        }
+        // 공백 및 하이픈 제거
+        return phone.replaceAll("[\\s-]", "");
     }
 
     // 회원가입 뷰 생성
     public ModelAndView createAddUserForKakao(KakaoRequestDTO kakaoRequest) {
-        boolean isRegistered = isUserAlreadyRegistered(kakaoRequest.getName(), kakaoRequest.getEmail());
-        String viewName = isRegistered ? "user/alreadyAddUser" : "user/addKakaoUserForm";
-        ModelAndView modelAndView = new ModelAndView(viewName);
-
-        if (isRegistered) {
-            modelAndView.addObject("message", "이미 가입된 사용자입니다.");
-        } else {
-            modelAndView.addObject("name", kakaoRequest.getName());
-            modelAndView.addObject("email", kakaoRequest.getEmail());
-            modelAndView.addObject("phone", kakaoRequest.getPhone());
+        ModelAndView modelAndView = new ModelAndView();
+        try {
+            // 사용자 이름과 이메일을 기준으로 기존 회원 여부를 확인
+            userService.findByNameAndEmail(kakaoRequest.getName(), kakaoRequest.getEmail())
+                    .ifPresentOrElse(
+                            user -> {
+                                // 사용자가 이미 가입된 경우
+                                modelAndView.setViewName("user/alreadyAddUser");
+                                modelAndView.addObject("message", "이미 가입된 사용자입니다.");
+                            },
+                            () -> {
+                                // 사용자가 가입되지 않은 경우
+                                modelAndView.setViewName("user/addKakaoUserForm");
+                                modelAndView.addObject("name", kakaoRequest.getName());
+                                modelAndView.addObject("email", kakaoRequest.getEmail());
+                                modelAndView.addObject("phone", kakaoRequest.getPhone());
+                            });
+        } catch (Exception e) {
+            logger.error("회원가입 뷰 생성 중 오류: {}", e.getMessage(), e);
+            throw new RuntimeException("회원가입 뷰 생성 중 문제가 발생했습니다.");
         }
-
         return modelAndView;
     }
 
     // 로그인 처리
     public String LoginForKaKao(KakaoRequestDTO kakaoUserInfo, HttpSession session, Model model, S3Service s3Service) {
-        boolean isRegistered = isUserAlreadyRegistered(kakaoUserInfo.getName(), kakaoUserInfo.getEmail());
-        if (isRegistered) {
-            logger.info("기존 사용자 로그인 성공!");
-            User user = findByNameAndEmail(kakaoUserInfo.getName(), kakaoUserInfo.getEmail());
+        try {
+            User user = userService.findByNameAndEmail(kakaoUserInfo.getName(), kakaoUserInfo.getEmail())
+                    .orElseThrow(() -> {
+                        logger.info("미가입 사용자: email={}", kakaoUserInfo.getEmail());
+                        return new IllegalArgumentException("가입된 정보가 없습니다.");
+                    });
+            logger.info("기존 사용자 로그인 성공: email={}", kakaoUserInfo.getEmail());
             session.setAttribute("user", user);
             return "redirect:/";
-        } else {
-            logger.warn("미가입 사용자입니다.");
-            String kakaoLoginImageUrl = s3Service.getFileUrl("common/kakao_login_medium_narrow.png");
-            model.addAttribute("kakaoLoginImageUrl", kakaoLoginImageUrl);
-            model.addAttribute("error", "가입된 정보가 없습니다.");
+        } catch (IllegalArgumentException e) {
+
+            model.addAttribute("error", e.getMessage());
             return "user/login";
         }
     }
