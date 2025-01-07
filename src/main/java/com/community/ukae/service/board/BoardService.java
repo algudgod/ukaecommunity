@@ -83,16 +83,18 @@ public class BoardService {
 
     // 게시글 쓰기 유효성 검사
     private void validateAddBoardRequest(BoardRequestDTO boardRequest) {
+
         if (boardRequest.getTitle() == null || boardRequest.getTitle().length() < 3 || boardRequest.getTitle().length() > 100) {
             logger.warn("유효성 검사 실패 - 게시글 제목 유효하지 않음: {}", boardRequest.getTitle());
             throw new IllegalArgumentException("제목은 3자 이상, 100자 이하이어야 합니다.");
         }
-        // HTML 태그를 제거한 순수 텍스트 추출
-        String plainContent = boardRequest.getContent().replaceAll("<[^>]*>", "").trim();
 
-        if (plainContent.length() < 5 || plainContent.length() > 2000) {
+        if (boardRequest.getContent().length() < 5 || boardRequest.getContent().length() > 2000) {
             throw new IllegalArgumentException("내용은 최소 5자 이상, 2000자 이하이어야 합니다.");
         }
+
+        logger.info("변환된 게시글 내용: {}", boardRequest.getContent());
+
     }
 
     // 게시글 수정 폼 데이터 생성
@@ -106,6 +108,7 @@ public class BoardService {
         }
 
         BoardRequestDTO boardRequest = new BoardRequestDTO();
+        boardRequest.setBoardNo(board.getBoardNo());
         boardRequest.setMainCategory(board.getMainCategory());
         boardRequest.setSubCategory(board.getSubCategory());
         boardRequest.setTag(board.getTag() != null ? board.getTag() : null);
@@ -115,6 +118,33 @@ public class BoardService {
         logger.info("수정 권한 확인 및 BoardRequest 생성 완료: boardNo={}", boardNo);
 
         return boardRequest;
+    }
+
+    public void updateBoard(BoardRequestDTO boardRequest, User user) {
+
+        Board board = boardRepository.findByBoardNo(boardRequest.getBoardNo())
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        if (!board.getUser().getLoginId().equals(user.getLoginId())) {
+            logger.warn("수정 권한 없음: 요청자={}, 게시글 작성자={}", user.getLoginId(), board.getUser().getLoginId());
+            throw new IllegalArgumentException("수정 권한이 없습니다.");
+        }
+
+        validateAddBoardRequest(boardRequest);
+
+        try {
+            board.setTitle(boardRequest.getTitle());
+            board.setContent(boardRequest.getContent());
+            board.setMainCategory(boardRequest.getMainCategory());
+            board.setSubCategory(boardRequest.getSubCategory());
+            board.setTag(boardRequest.getTag());
+
+            boardRepository.save(board);
+            logger.info("게시글 업데이트 성공: boardNo={}, title={}", board.getBoardNo(), board.getTitle());
+        } catch (Exception e) {
+            logger.error("게시글 업데이트 실패: {}", e.getMessage());
+            throw e;
+        }
     }
 
     // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
@@ -173,6 +203,21 @@ public class BoardService {
                 .tag(board.getTag())
                 .tagName(BoardTag.getTagNameOrDefault(board.getTag()))
                 .build();
+
+    }
+
+    // 게시글 삭제
+    public void deleteBoard(int boardNo, User user) {
+        Board board = boardRepository.findByBoardNo(boardNo)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
+
+        // 작성자 확인
+        if (!board.getUser().getLoginId().equals(user.getLoginId())) {
+            logger.warn("삭제 권한 없음: 요청자={}, 작성자={}", user.getLoginId(), board.getUser().getLoginId());
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+
+        boardRepository.delete(board);
 
     }
 

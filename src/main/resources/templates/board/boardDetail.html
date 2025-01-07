@@ -49,21 +49,19 @@
       <hr>
 
       <!-- 게시글 내용 -->
-      <div class="mb-4" style="white-space: pre-line;">
+      <div class="mb-4">
         <div th:utext="${board.content}"></div>
       </div>
 
       <!-- 목록, 수정, 삭제 버튼 -->
       <div class="d-flex justify-content-between">
         <a th:href="@{/boardList(boardCategory=${boardCategory})}" class="btn btn-sm btn-outline-secondary">목록</a>
-
-        <!-- 수정/삭제 버튼 -->
         <div>
           <a th:if="${user != null and user.nickname == board.nickname}"
              th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
              class="btn btn-sm btn-outline-secondary">수정</a>
           <form th:if="${user != null and user.nickname == board.nickname}"
-                th:action="@{/boards/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                th:action="@{/board/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
                 method="post"
                 onsubmit="return confirm('정말 삭제하시겠습니까?');"
                 style="display: inline;">

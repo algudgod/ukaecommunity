@@ -153,10 +153,15 @@
         // Form 제출 시 Summernote 내용을 동기화
         const form = document.querySelector("form");
         form.addEventListener("submit", function () {
+            // 서머노트의 실제 HTML 내용 가져오기
+            const content = $('#content').summernote('code');
+
+            // 디버깅: 서머노트에서 가져온 HTML 내용 출력
+            console.log("서머노트 HTML 내용:", content);
+
+            // textarea와 동기화 (필요 시)
             const contentElement = document.getElementById("content");
-            const content = contentElement.value; // Summernote HTML 내용 가져오기
-            const plainTextContent = content.replace(/<[^>]*>/g, '').trim(); // HTML 태그 제거
-            contentElement.value = plainTextContent; // 동기화
+            contentElement.value = content; // Summernote 내용을 textarea에 동기화
         });
 
         // Summernote 초기화

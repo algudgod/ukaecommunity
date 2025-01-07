@@ -7,11 +7,14 @@ import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.enums.BoardTag;
 import com.community.ukae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -112,7 +115,7 @@ public class BoardController {
 
     // 게시글 상세 조회
     @GetMapping("detail/{boardNo}")
-    public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model){
+    public String getBoardDetail(@PathVariable int boardNo, HttpSession session, Model model) {
 
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
@@ -130,7 +133,7 @@ public class BoardController {
     // 게시글 수정 form
     @GetMapping("editBoard/{boardNo}")
     public String editBoardForm(@PathVariable int boardNo,
-                                HttpSession session, Model model){
+                                HttpSession session, Model model) {
         // 사용자 인증 체크
         User user = (User) session.getAttribute("user");
         if (user == null) {
@@ -140,8 +143,8 @@ public class BoardController {
 
         // 게시글 조회
         BoardResponseDTO boardResponse = boardService.findBoardByBoardNo(boardNo);
-        if(boardResponse == null) {
-            logger.warn("게시글을 찾을 수 없음: boardNo={}", boardNo);
+        if (boardResponse == null) {
+            logger.warn("해당 게시글을 찾을 수 없습니다.: boardNo={}", boardNo);
             return "redirect:/error/notFound";
         }
         // 수정 폼 데이터
@@ -161,6 +164,64 @@ public class BoardController {
         logger.info("게시글 수정 폼 가져오기 성공: boardNo={}", boardNo);
 
         return "board/editBoardForm";
+    }
+
+    @PostMapping("updateBoard")
+    public String updateBoard(@ModelAttribute BoardRequestDTO boardRequest,
+                              HttpSession session, Model model) {
+        // 사용자 인증 체크
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", user);
+
+        try {
+            // 서비스 레이어에서 유효성 검사 및 업데이트 처리
+            boardService.updateBoard(boardRequest, user);
+            return "redirect:/board/detail/" + boardRequest.getBoardNo();
+        } catch (IllegalArgumentException e) {
+            logger.warn("유효성 검사 실패 또는 권한 문제: {}", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
+        } catch (Exception e) {
+            logger.error("게시글 업데이트 실패: {}", e.getMessage());
+        }
+
+        BoardCategory boardCategory = BoardCategory.valueOf(boardRequest.getSubCategory());
+        BoardTag boardTag = (boardRequest.getTag() != null) ? BoardTag.valueOf(boardRequest.getTag()) : null;
+        logger.info("updateBoard 게시글 수정 폼 초기화: boardNo={}, subCategory={}, tag={}", boardRequest.getBoardNo(), boardCategory, boardTag);
+
+        model.addAttribute("boardRequest", boardRequest);
+        model.addAttribute("subCategory", boardCategory);
+        model.addAttribute("tag", boardTag);
+        model.addAttribute("boardCategories", boardService.getAllCategories());
+        model.addAttribute("tags", BoardTag.values());
+
+        return "board/editBoardForm";
+    }
+
+    @PostMapping("/deleteBoard/{boardNo}")
+    public String deleteBoard(@PathVariable int boardNo,
+                              HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", user);
+
+        try {
+            BoardResponseDTO board = boardService.findBoardByBoardNo(boardNo);
+            boardService.deleteBoard(boardNo, user);
+            logger.info("게시글 삭제 성공: boardNo={}, mainCategory={}, subCategory={}, 삭제자={}",
+                    boardNo, board.getMainCategory(), board.getSubCategory(), user.getLoginId());
+            return "redirect:/board/boardList?mainCategory=" + board.getMainCategory() +
+                    "&subCategory=" + board.getSubCategory();
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            logger.warn("deleteBoard 실패: boardNo={}, error={}", boardNo, e.getMessage());
+            return "redirect:/error/notFound";
+        }
+
     }
 
 
