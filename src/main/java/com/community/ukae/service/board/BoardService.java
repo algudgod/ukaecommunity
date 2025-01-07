@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -220,5 +222,27 @@ public class BoardService {
         boardRepository.delete(board);
 
     }
+
+    // 오늘 날짜 새로운 게시글 수 계산
+    public int countTodayBoardByCategory(String mainCategory, String subCategory){
+
+        List<Board> boards = boardRepository.findByMainCategoryAndSubCategory(mainCategory, subCategory);
+
+        int todayBoardCount = 0;
+        LocalDate today = LocalDate.now();
+
+        for(Board board : boards){
+            if(board.getCreateDate().toLocalDate().isEqual(today)){
+                todayBoardCount++;
+            }
+        }
+        logger.info("오늘 날짜 게시글 수: mainCategory={}, subCategory={}, count={}", mainCategory, subCategory, todayBoardCount);
+
+        return todayBoardCount;
+
+
+    }
+
+
 
 }

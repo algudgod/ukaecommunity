@@ -45,6 +45,8 @@
             <h4 class="board-mainCategoryName mb-2" th:text="${subCategory.mainCateName + ' - ' + subCategory.subCateName} "></h4>
             <!-- 게시판 부가 설명 -->
             <p class="board-description" style="font-size: 15px; color: #888;" th:text="${subCategory.description}"></p>
+            <p class="board-description" style="font-size: 13px;"> 새글 <span th:text="${todayBoardCount} + ' / ' + ${totalBoardCount}"></span></p>
+
 
             <!-- 글쓰기 버튼 -->
             <div class="d-flex justify-content-end mt-3">

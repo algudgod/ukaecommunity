@@ -47,6 +47,12 @@ public class BoardController {
         List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
         model.addAttribute("boards", boardResponse);
 
+        int todayBoardCount = boardService.countTodayBoardByCategory(mainCategory, subCategory);
+        model.addAttribute("todayBoardCount",todayBoardCount);
+        int totalBoardCount = boardResponse.size();
+        model.addAttribute("totalBoardCount",totalBoardCount);
+
+
         return "board/boardList";
 
     }
