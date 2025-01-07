@@ -126,6 +126,8 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
+        boardService.updateViewCount(boardNo,user);
+
         try {
             BoardResponseDTO boardResponse = boardService.findBoardByBoardNo(boardNo);
             model.addAttribute("board", boardResponse);

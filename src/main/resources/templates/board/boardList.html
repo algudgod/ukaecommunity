@@ -14,7 +14,7 @@
     <style>
 
         .board-row {
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .board-nickname,
@@ -58,12 +58,12 @@
             <table class="table text-center mt-1 board-table" >
 
                 <thead>
-                <tr style="font-size: 15px;">
+                <tr style="font-size: 14px;">
                     <th style="width: 50px;"></th>
                     <th style="width: 150px;"></th>
-                    <th style="width: 400px;">제목</th>
+                    <th style="width: 500px;">제목</th>
                     <th style="width: 150px; text-align: left;">작성자</th>
-                    <th style="width: 150px;">작성일</th>
+                    <th style="width: 100px;">작성일</th>
                     <th style="width: 100px;">조회</th>
                 </tr>
                 </thead>
@@ -76,7 +76,7 @@
                 <tr class="board-row" th:each="board : ${boards}">
                     <td class="board-CategoryBoardNo" th:text="${board.categoryBoardNo}"></td>
                     <td class="board-tag" th:text="${board.tagName}"></td>
-                    <td class="board-title">
+                    <td class="board-title" style="font-size: 14px;">
                         <a th:href="@{/board/detail/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
                     </td>
                     <td class="board-nickname" th:text="${board.nickname}"></td>
