@@ -53,9 +53,12 @@
         <div th:utext="${board.content}"></div>
       </div>
 
+      <!-- 구분선 -->
+      <hr>
+
       <!-- 목록, 수정, 삭제 버튼 -->
       <div class="d-flex justify-content-between">
-        <a th:href="@{/boardList(boardCategory=${boardCategory})}" class="btn btn-sm btn-outline-secondary">목록</a>
+        <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}" class="btn btn-sm btn-outline-secondary">목록</a>
         <div>
           <a th:if="${user != null and user.nickname == board.nickname}"
              th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
