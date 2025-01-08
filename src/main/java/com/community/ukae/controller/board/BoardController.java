@@ -49,6 +49,8 @@ public class BoardController {
         int totalBoardCount = boardResponse.size();
         model.addAttribute("totalBoardCount",totalBoardCount);
 
+        model.addAttribute("boardCategories", boardService.getAllCategories());
+
         return "board/boardList";
 
     }

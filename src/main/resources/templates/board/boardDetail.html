@@ -74,6 +74,20 @@
             padding: 2px 6px; /* 패딩 줄이기 */
             font-size: 12px; /* 글자 크기 줄이기 */
         }
+
+        .subcategory a {
+            color: black;
+            text-decoration: none;
+        }
+
+        .subcategory a:hover {
+            text-decoration: underline; /* 호버 시 밑줄 */
+        }
+
+        body {
+            overflow-x: hidden; /* 가로 스크롤 방지 */
+        }
+
     </style>
 
 </head>
@@ -82,10 +96,18 @@
 <div th:replace="~{common/header :: header}"></div>
 
 <!-- 게시글 상세보기 컨테이너 -->
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
+<div class="container-fluid mt-5 px-0">
 
+    <div class="row">
+
+        <!-- 공통 사이드바 -->
+        <div class="col-md-2">
+            <div class="sidebar">
+                <div th:replace="~{common/sidebar :: sidebar}"></div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
             <!-- 카테고리 -->
             <h6>
                 <th:block th:each="category : ${boardCategories}">

@@ -14,7 +14,7 @@
     <style>
 
         .board-row {
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .board-nickname,
@@ -22,25 +22,40 @@
            text-align: left;
         }
 
-        /* 제목의 하이퍼링크 커스텀 */
-        .board-title a {
+        .board-title a,
+        .subcategory a {
             color: black;
             text-decoration: none;
         }
-        .board-title a:hover {
-            text-decoration: underline;
+
+        .board-title a:hover,
+        .subcategory a:hover {
+            text-decoration: underline; /* 호버 시 밑줄 */
+        }
+
+        body {
+            overflow-x: hidden; /* 가로 스크롤 방지 */
         }
 
     </style>
 
 </head>
 <body>
+<!-- 공통 헤더 -->
 <div th:replace="~{common/header :: header}"></div>
 
-<div class="container mt-5">
+<div class="container-fluid mt-5 px-0">
+
     <div class="row">
 
-        <div class="col-md-12">
+        <!-- 공통 사이드바 -->
+        <div class="col-md-2">
+            <div class="sidebar">
+                <div th:replace="~{common/sidebar :: sidebar}"></div>
+            </div>
+        </div>
+
+        <div class="col-md-10">
             <!-- 게시판 제목 -->
             <h4 class="board-mainCategoryName mb-2"
                 th:text="${subCategory.mainCateName + ' - ' + subCategory.subCateName} "></h4>
@@ -49,18 +64,19 @@
             <p class="board-description" style="font-size: 13px;"> 새글 <span
                     th:text="${todayBoardCount} + ' / ' + ${totalBoardCount}"></span></p>
 
-            <table class="table text-center mt-1 board-table">
+            <table class="table text-center board-table me-5">
 
                 <thead>
-                <tr style="font-size: 14px;">
-                    <th style="width: 50px;"></th>
-                    <th style="width: 150px;"></th>
-                    <th style="width: 500px;">제목</th>
+                <tr style="font-size: 15px;">
+                    <th style="width: 40px;"></th>
+                    <th style="width: 120px;"></th>
+                    <th style="width: 1000px;">제목</th>
                     <th style="width: 150px; text-align: left;">작성자</th>
-                    <th style="width: 100px;">작성일</th>
-                    <th style="width: 100px;">조회</th>
+                    <th style="width: 120px;">작성일</th>
+                    <th style="width: 150px;">조회</th>
                 </tr>
                 </thead>
+
                 <tbody>
 
                 <tr th:if="${boards.size() == 0}">
@@ -70,7 +86,7 @@
                 <tr class="board-row" th:each="board : ${boards}">
                     <td class="board-CategoryBoardNo" th:text="${board.categoryBoardNo}"></td>
                     <td class="board-tag" th:text="${board.tagName}"></td>
-                    <td class="board-title" style="font-size: 14px;">
+                    <td class="board-title">
                         <a th:href="@{/board/detail/{boardNo}(boardNo=${board.boardNo})}" th:text="${board.title}"></a>
                         <a th:if="${board.commentCount > 0}"
                            style="font-size: 11px; color: red; font-weight: bold;"
@@ -87,7 +103,7 @@
             </table>
 
             <!-- 글쓰기 버튼 -->
-            <div class="d-flex justify-content-end mt-3">
+            <div class="d-flex justify-content-end mt-3 me-4">
                 <a th:if="${user != null}"
                    th:href="@{/board/addBoardForm(mainCategory=${mainCategory}, subCategory=${subCategory.name()})}"
                    class="btn btn-outline-dark btn-sm">글쓰기</a>
@@ -95,6 +111,7 @@
         </div>
     </div>
 </div>
+
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

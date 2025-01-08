@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Sidebar</title>
+  <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+</head>
+
+<body>
+
+<div th:fragment="sidebar" style="padding-left: 18px; margin-left: 20px;">
+
+  <div th:each="category : ${boardCategories}" class="mb-3">
+    <!-- 메인 카테고리 -->
+    <div class="category mb-1" th:text="${category.value[0].mainCateName}" style="font-size: 15px; font-weight: bold;">
+    </div>
+
+    <!-- 서브 카테고리 -->
+    <div th:each="subcategory : ${category.value}" class="subcategory mb-1" style="font-size: 14px; margin-left: 10px;">
+      <a th:href="@{/board/boardList(mainCategory=${category.key}, subCategory=${subcategory.name()})}"
+         th:text="${subcategory.subCateName}"></a>
+    </div>
+    <hr>
+  </div>
+</div>
+
+</body>
+</html>
