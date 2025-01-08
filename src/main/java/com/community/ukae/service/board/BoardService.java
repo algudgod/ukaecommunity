@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -224,15 +223,15 @@ public class BoardService {
     }
 
     // 오늘 날짜 새로운 게시글 수 계산
-    public int countTodayBoardByCategory(String mainCategory, String subCategory){
+    public int countTodayBoardByCategory(String mainCategory, String subCategory) {
 
         List<Board> boards = boardRepository.findByMainCategoryAndSubCategory(mainCategory, subCategory);
 
         int todayBoardCount = 0;
         LocalDate today = LocalDate.now();
 
-        for(Board board : boards){
-            if(board.getCreateDate().toLocalDate().isEqual(today)){
+        for (Board board : boards) {
+            if (board.getCreateDate().toLocalDate().isEqual(today)) {
                 todayBoardCount++;
             }
         }
@@ -240,11 +239,10 @@ public class BoardService {
 
         return todayBoardCount;
 
-
     }
 
     // 조회수
-    public void updateViewCount(int boardNo, User user){
+    public void updateViewCount(int boardNo, User user) {
 
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
@@ -258,7 +256,6 @@ public class BoardService {
             logger.info("작성자 본인 조회로 인해 조회수 증가 안 함: boardNo={}, 작성자={}", boardNo, user.getLoginId());
         }
     }
-
 
 
 }

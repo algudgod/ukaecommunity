@@ -20,9 +20,10 @@ public class BoardRestController {
         this.s3Service = s3Service;
     }
 
+    // 게시글 작성 시 다중 업로드
     @PostMapping("/uploadImages")
     public List<String> uploadImages(@RequestParam("files") List<MultipartFile> files) throws IOException {
-        // S3 다중 업로드 호출
         return s3Service.uploadFiles(files);
     }
+
 }

@@ -7,14 +7,11 @@ import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.enums.BoardTag;
 import com.community.ukae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -51,7 +48,6 @@ public class BoardController {
         model.addAttribute("todayBoardCount",todayBoardCount);
         int totalBoardCount = boardResponse.size();
         model.addAttribute("totalBoardCount",totalBoardCount);
-
 
         return "board/boardList";
 
@@ -174,6 +170,7 @@ public class BoardController {
         return "board/editBoardForm";
     }
 
+    // 게시글 수정
     @PostMapping("updateBoard")
     public String updateBoard(@ModelAttribute BoardRequestDTO boardRequest,
                               HttpSession session, Model model) {
@@ -208,9 +205,11 @@ public class BoardController {
         return "board/editBoardForm";
     }
 
+    // 게시글 삭제
     @PostMapping("/deleteBoard/{boardNo}")
     public String deleteBoard(@PathVariable int boardNo,
                               HttpSession session, Model model) {
+
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/user/login";

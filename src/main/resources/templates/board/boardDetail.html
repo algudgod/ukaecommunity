@@ -2,15 +2,71 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head>
-  <meta charset="UTF-8">
-  <title>게시판</title>
+    <meta charset="UTF-8">
+    <title>게시판</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Custom CSS -->
-  <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+
+  <style>
+    .form-control {
+            resize: none; /* 사용자가 크기 조정 못하게 고정 */
+            height: 95px; /* 입력 창 높이 설정 */
+            font-size: 0.9rem; /* 텍스트 크기 */
+        }
+
+        .comment-item {
+            margin-bottom: 1.2rem; /* 댓글 간 간격을 넓힘 */
+        }
+        .comment-item .comment-header p strong {
+            font-size: 0.9rem; /* 닉네임 크기 */
+            font-weight: 800; /* 중간 굵기 */
+        }
+        .comment-item .comment-body p {
+            font-size: 0.9rem; /* 내용 크기 */
+            margin-top: 0.2rem;/* 닉네임과 내용 사이 간격 추가 */
+        }
+        .comment-item .comment-header p {
+            margin: 0; /* 기본 여백 제거 */
+        }
+
+        /* Flexbox를 사용하여 한 줄에 배치 */
+        .comment-content-row {
+            display: flex;
+            justify-content: space-between; /* 내용과 버튼 그룹 간격 조정 */
+            align-items: center; /* 세로 가운데 정렬 */
+        }
+
+        .comment-content {
+            margin: 0; /* 기본 여백 제거 */
+            flex: 1; /* 버튼 제외하고 나머지 공간 차지 */
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 10px; /* 버튼 간격 */
+        }
+
+        .form-control {
+        border: 1px solid #ccc; /* 기본 테두리 색 */
+        border-radius: 4px; /* 모서리 둥글게 */
+        outline: none; /* 기본 outline 제거 */
+        }
+
+        /* textarea 포커스 상태 */
+        .form-control:focus {
+            border: 1px solid #333; /* 테두리를 얇은 검정으로 설정 */
+            box-shadow: none; /* 파란색 그림자 제거 */
+        }
+        .comment-actions .btn-sm {
+        padding: 2px 6px; /* 패딩 줄이기 */
+        font-size: 12px; /* 글자 크기 줄이기 */
+    }
+  </style>
 
 </head>
 <body>
@@ -19,62 +75,127 @@
 
 <!-- 게시글 상세보기 컨테이너 -->
 <div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-10">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
 
-      <!-- 카테고리 -->
-      <h6>
-        <th:block th:each="category : ${boardCategories}">
-          <th:block th:if="${category.key == board.mainCategory}">
-            <th:block th:each="subcategory : ${category.value}">
+            <!-- 카테고리 -->
+            <h6>
+                <th:block th:each="category : ${boardCategories}">
+                    <th:block th:if="${category.key == board.mainCategory}">
+                        <th:block th:each="subcategory : ${category.value}">
                 <span th:if="${subcategory.name() == board.subCategory}"
                       th:text="${subcategory.subCateName + ' 카테고리'}">
                 </span>
-            </th:block>
-          </th:block>
-        </th:block>
-      </h6>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </h6>
 
-      <!-- 게시글 제목 -->
-      <h3 th:text="'[' + ${board.tagName} + '] ' + ${board.title}"></h3>
+            <!-- 게시글 제목 -->
+            <h3 th:text="'[' + ${board.tagName} + '] ' + ${board.title}"></h3>
 
-      <!-- 작성자 및 작성일 -->
-      <div class="text-muted mb-3">
-        <span th:text="${board.nickname}"></span>
-        <span th:text="'조회수: ' + ${board.viewCount}" class="ms-3"></span>
-        <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}" class="ms-3"></span>
-      </div>
+            <!-- 작성자 및 작성일 -->
+            <div class="text-muted mb-3">
+                <span th:text="${board.nickname}"></span>
+                <span th:text="'조회수: ' + ${board.viewCount}" class="ms-3"></span>
+                <span th:text="${#temporals.format(board.createDate, 'yyyy-MM-dd HH:mm')}" class="ms-3"></span>
+            </div>
 
-      <!-- 구분선 -->
-      <hr>
+            <!-- 구분선 -->
+            <hr>
 
-      <!-- 게시글 내용 -->
-      <div class="mb-4">
-        <div th:utext="${board.content}"></div>
-      </div>
+            <!-- 게시글 내용 -->
+            <div class="mb-4">
+                <div th:utext="${board.content}"></div>
+            </div>
 
-      <!-- 구분선 -->
-      <hr>
+            <!-- 구분선 -->
+            <hr>
 
-      <!-- 목록, 수정, 삭제 버튼 -->
-      <div class="d-flex justify-content-between">
-        <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}" class="btn btn-sm btn-outline-secondary">목록</a>
-        <div>
-          <a th:if="${user != null and user.nickname == board.nickname}"
-             th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
-             class="btn btn-sm btn-outline-secondary">수정</a>
-          <form th:if="${user != null and user.nickname == board.nickname}"
-                th:action="@{/board/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
-                method="post"
-                onsubmit="return confirm('정말 삭제하시겠습니까?');"
-                style="display: inline;">
-            <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-          </form>
+            <div class="card-footer">
+                <!-- 댓글 제목 -->
+                <h5 id="toggle-comments" style="cursor: pointer; margin-bottom: 1rem; font-size:15px;">
+                    댓글
+                </h5>
+                <!-- 댓글 영역 -->
+                <div id="comment-section">
+
+                    <div class="comment-list mt-3">
+                        <div id="comment-template" style="display: none;">
+                            <div class="comment-item">
+
+                                <div class="comment-header">
+                                    <p><strong class="comment-nickname"></strong>
+                                        <span class="comment-date" style="font-size: 0.85rem; color: #666;"></span>
+                                    </p>
+                                </div>
+
+                                <div class="comment-body">
+                                    <div class="comment-content-row">
+                                        <p class="comment-content"></p>
+                                        <div class="comment-actions">
+                                            <button class="btn btn-sm btn-outline-secondary comment-edit-btn">수정
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger comment-delete-btn">삭제</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="commentForm" onsubmit="addComment(event)">
+                        <div class="form-group">
+                                    <textarea
+                                            id="comment-content"
+                                            class="form-control"
+                                            name="content"
+                                            rows="4"
+                                            maxlength="300"
+                                            th:placeholder="${user == null} ? '로그인 후 작성할 수 있습니다.' : '댓글을 입력하세요'"
+                                            th:disabled="${user == null}"
+                                            required
+                                    ></textarea>
+                            <div style="text-align: right; font-size: 13px;">
+                                <span id="char-count">0</span>/300
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                            <button type="submit" class="btn btn-sm btn-dark" style="font-size: 14px;"
+                                    th:if="${user != null}">등록
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <input type="hidden" id="boardNo" th:value="${board.boardNo}"/>
+            <input type="hidden" id="loggedInUserNickname" th:value="${user != null ? user.nickname : ''}">
+
+            <!-- 구분선 -->
+            <hr>
+
+
+            <!-- 목록, 수정, 삭제 버튼 -->
+            <div class="d-flex justify-content-between">
+                <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}"
+                   class="btn btn-sm btn-outline-secondary">목록</a>
+                <div>
+                    <a th:if="${user != null and user.nickname == board.nickname}"
+                       th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+                       class="btn btn-sm btn-outline-secondary">수정</a>
+                    <form th:if="${user != null and user.nickname == board.nickname}"
+                          th:action="@{/board/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                    </form>
+                </div>
+
+            </div>
         </div>
-
-      </div>
     </div>
-  </div>
 </div>
 
 
