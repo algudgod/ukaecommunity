@@ -108,6 +108,25 @@
         </div>
 
         <div class="col-md-9">
+            <!-- 목록, 수정, 삭제 버튼 -->
+            <div class="d-flex justify-content-between mb-3">
+                <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}"
+                   class="btn btn-sm btn-outline-secondary">목록</a>
+                <div>
+                    <a th:if="${user != null and user.nickname == board.nickname}"
+                       th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
+                       class="btn btn-sm btn-outline-secondary">수정</a>
+                    <form th:if="${user != null and user.nickname == board.nickname}"
+                          th:action="@{/board/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
+                          method="post"
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
+                          style="display: inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                    </form>
+                </div>
+            </div>
+            <!-- 구분선 -->
+            <hr>
             <!-- 카테고리 -->
             <h6>
                 <th:block th:each="category : ${boardCategories}">
@@ -195,7 +214,7 @@
                             </div>
                         </div>
                         <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                            <button type="submit" class="btn btn-sm btn-dark" style="font-size: 14px;"
+                            <button type="submit" class="btn btn-sm btn-dark mb-3" style="font-size: 14px;"
                                     th:if="${user != null}">등록
                             </button>
                         </div>
@@ -205,31 +224,12 @@
             <input type="hidden" id="boardNo" th:value="${board.boardNo}"/>
             <input type="hidden" id="loggedInUserNickname" th:value="${user != null ? user.nickname : ''}">
 
-            <!-- 구분선 -->
-            <hr>
-
-
-            <!-- 목록, 수정, 삭제 버튼 -->
-            <div class="d-flex justify-content-between">
-                <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}"
-                   class="btn btn-sm btn-outline-secondary">목록</a>
-                <div>
-                    <a th:if="${user != null and user.nickname == board.nickname}"
-                       th:href="@{/board/editBoard/{boardNo}(boardNo=${board.boardNo})}"
-                       class="btn btn-sm btn-outline-secondary">수정</a>
-                    <form th:if="${user != null and user.nickname == board.nickname}"
-                          th:action="@{/board/deleteBoard/{boardNo}(boardNo=${board.boardNo})}"
-                          method="post"
-                          onsubmit="return confirm('정말 삭제하시겠습니까?');"
-                          style="display: inline;">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
-                    </form>
-                </div>
-
-            </div>
         </div>
     </div>
 </div>
+
+<!-- 공통 푸터 -->
+<div th:replace="~{common/footer :: footer}"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
