@@ -2,6 +2,7 @@ package com.community.ukae.controller.comment;
 
 import com.community.ukae.dto.comment.CommentRequestDTO;
 import com.community.ukae.dto.comment.CommentResponseDTO;
+import com.community.ukae.entity.comment.Comment;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.service.comment.CommentService;
 import jakarta.servlet.http.HttpSession;
@@ -59,4 +60,46 @@ public class CommentRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    // 댓글 수정
+    @PutMapping("/updateComment/{commentNo}")
+    public ResponseEntity<CommentResponseDTO> updateComment(@PathVariable int commentNo,
+                                                            @RequestBody CommentRequestDTO commentRequest, HttpSession session) {
+        logger.info("댓글 수정 요청: commentNo={}, content={}", commentNo, commentRequest.getContent());
+
+        try {
+            // 사용자 인증 확인
+            User user = (User) session.getAttribute("user");
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            CommentResponseDTO updatedComment = commentService.updateComment(commentNo, commentRequest, user);
+            return ResponseEntity.ok(updatedComment);
+
+        } catch (Exception e) {
+            logger.error("댓글 수정 중 오류 발생: commentNo={}", commentNo, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // 댓글 삭제
+    @DeleteMapping("deleteComment/{commentNo}")
+    public ResponseEntity<Void> deleteComment(@PathVariable int commentNo, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        try {
+            commentService.deleteComment(commentNo, user);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("댓글 삭제 중 오류 발생: commentNo={}", commentNo, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
 }

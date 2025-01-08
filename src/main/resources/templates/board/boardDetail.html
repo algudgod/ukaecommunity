@@ -13,6 +13,14 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 
     <style>
+
+        .mb-4 {
+            height: 300px;
+            overflow-y: auto; /* 내용이 넘칠 경우 세로 스크롤 추가 */
+            word-wrap: break-word; /* 긴 단어를 자동으로 줄 바꿈 */
+            padding: 10px; /* 내부 여백 추가 */
+        }
+
         .form-control {
                 resize: none; /* 사용자가 크기 조정 못하게 고정 */
                 height: 95px; /* 입력 창 높이 설정 */
@@ -144,6 +152,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <hr>
 
                     <form id="commentForm" onsubmit="addComment(event)">
                         <div class="form-group">
@@ -386,14 +396,142 @@
         }
     });
 
+    // 댓글 수정
     function updateComment(commentNo) {
-        console.log(`수정 기능 호출됨: commentNo=${commentNo}`);
-        alert("수정 기능은 아직 구현되지 않았습니다.");
+        // 댓글 요소를 찾기
+        const commentElement = document.querySelector(`[data-comment-no='${commentNo}']`);
+        if (!commentElement) {
+            alert("댓글을 찾을 수 없습니다.");
+            return;
+        }
+
+        // 기존 내용 가져오기
+        const commentContentElement = commentElement.querySelector(".comment-content");
+        const originalContent = commentContentElement.textContent;
+
+        // 기존 버튼 그룹 가져오기
+        const buttonGroup = commentElement.querySelector(".comment-actions");
+
+        // 수정할 수 있도록 텍스트 상자로 변경
+        const textarea = document.createElement("textarea");
+        textarea.value = originalContent;
+        textarea.className = "form-control"; // 기존 form-control 스타일 적용
+        textarea.rows = 2; // 높이는 Flexbox에 맞게 조정
+        textarea.style.flex = "1"; // Flexbox에서 버튼과 나란히 배치되도록 설정
+
+        // 저장 버튼 생성
+        const saveButton = document.createElement("button");
+        saveButton.textContent = "저장";
+        saveButton.className = "btn btn-sm btn-outline-secondary";
+
+        // 취소 버튼 생성
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "취소";
+        cancelButton.className = "btn btn-sm btn-outline-danger";
+
+        // UI 복구 함수
+        function restoreOriginalUI() {
+            textarea.remove();
+            saveButton.remove();
+            cancelButton.remove();
+            commentContentElement.style.display = "block";
+            buttonGroup.style.display = "flex";
+        }
+
+        // 저장 버튼 클릭 이벤트
+        saveButton.onclick = () => {
+            const updatedContent = textarea.value.trim();
+
+            if (!updatedContent) {
+                alert("내용을 입력해주세요.");
+                return;
+            }
+
+            // 서버에 PUT 요청 보내기
+            fetch(`/api/comment/updateComment/${commentNo}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    commentNo: commentNo, // 댓글 번호 추가
+                    content: updatedContent, // 수정된 댓글 내용
+                }),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        return response.json().then((errorData) => {
+                            throw new Error(errorData.message || "댓글 수정에 실패했습니다.");
+                        });
+                    }
+                    return response.json();
+                })
+                .then((updatedComment) => {
+                    // 서버 응답에 따라 UI 업데이트
+                    commentContentElement.textContent = updatedComment.content;
+                    restoreOriginalUI();
+                })
+                .catch((error) => {
+                    alert("댓글 수정 중 오류가 발생했습니다: " + error.message);
+                });
+        };
+
+        // 취소 버튼 클릭 이벤트
+        cancelButton.onclick = () => {
+            restoreOriginalUI(); // UI 복구
+        };
+
+        // 기존 텍스트 숨기기
+        commentContentElement.style.display = "none";
+
+        // 기존 버튼 숨기기
+        buttonGroup.style.display = "none";
+
+        // Flexbox 구조로 수정 UI 추가
+        const editRow = document.createElement("div");
+        editRow.className = "comment-content-row"; // 기존 레이아웃 클래스
+
+        // textarea와 버튼 추가
+        editRow.appendChild(textarea);
+
+        const actions = document.createElement("div");
+        actions.className = "comment-actions"; // 버튼 레이아웃 클래스
+        actions.appendChild(saveButton);
+        actions.appendChild(cancelButton);
+        editRow.appendChild(actions);
+
+        // 댓글 요소에 추가
+        commentElement.appendChild(editRow);
     }
 
+    // 댓글 삭제
     function deleteComment(commentNo) {
-        console.log(`삭제 기능 호출됨: commentNo=${commentNo}`);
-        alert("삭제 기능은 아직 구현되지 않았습니다.");
+        // 삭제 확인 메시지
+        const confirmDelete = confirm("이 댓글을 삭제하시겠습니까?");
+        if (!confirmDelete) {
+            return;
+        }
+
+        // 서버에 DELETE 요청 보내기
+        fetch(`/api/comment/deleteComment/${commentNo}`, {
+            method: "DELETE",
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("댓글 삭제에 실패했습니다.");
+                }
+                return response.text();
+            })
+            .then((message) => {
+                // 화면에서 댓글 삭제
+                const commentElement = document.querySelector(`[data-comment-no="${commentNo}"]`);
+                if (commentElement) {
+                    commentElement.remove();
+                }
+            })
+            .catch((error) => {
+                alert("댓글 삭제 중 오류가 발생했습니다: " + error.message);
+            });
     }
 
 </script>
