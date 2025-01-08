@@ -193,6 +193,9 @@ public class BoardService {
                 .map(ImageFile::getImageUrl)
                 .toList();
 
+        // 댓글 수 가져오기
+        int commentCount = commentRepository.countByBoardBoardNo(boardNo);
+
         logger.info("게시글 조회 성공: BoardNo={}", boardNo);
 
         return BoardResponseDTO.builder()
@@ -207,6 +210,7 @@ public class BoardService {
                 .imageUrls(imageUrls)
                 .tag(board.getTag())
                 .tagName(BoardTag.getTagNameOrDefault(board.getTag()))
+                .commentCount(commentCount)
                 .build();
 
     }
@@ -245,7 +249,7 @@ public class BoardService {
 
     }
 
-    // 조회수
+    // 게시글 조회수
     public void updateViewCount(int boardNo, User user) {
 
         Board board = boardRepository.findByBoardNo(boardNo)
