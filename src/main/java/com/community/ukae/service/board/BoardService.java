@@ -8,6 +8,7 @@ import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.enums.BoardTag;
 import com.community.ukae.repository.board.BoardRepository;
+import com.community.ukae.repository.comment.CommentRepository;
 import com.community.ukae.repository.imageFile.ImageFileRepository;
 import com.community.ukae.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final ImageFileRepository imageFileRepository;
-    private final S3Service s3Service;
+    private final CommentRepository commentRepository;
 
     // mainCategory 와 subCategory 에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
@@ -170,6 +171,9 @@ public class BoardService {
             boardResponse.setViewCount(((Number) row[8]).intValue());
             boardResponse.setTag((String) row[9]); // 수정 폼용 name() 값
             boardResponse.setTagName(BoardTag.getTagNameOrDefault((String) row[9])); // 리스트/상세 화면용 한글 값
+
+            int commentCount = commentRepository.countByBoardBoardNo(boardResponse.getBoardNo());
+            boardResponse.setCommentCount(commentCount);
 
             boards.add(boardResponse);
         }

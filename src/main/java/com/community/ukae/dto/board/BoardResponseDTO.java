@@ -30,5 +30,7 @@ public class BoardResponseDTO {
     private String tag;        // 수정 폼용 (name())
     private String tagName;    // 리스트/상세 화면용 (tagName)
 
+    private int commentCount;
+
 
 }

@@ -14,4 +14,9 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
     List<Comment> findByBoard_boardNo(int boardNo);
     Optional<Comment> findByCommentNo(int commentNo);
 
+    /* SELECT COUNT(*)
+        FROM comment
+        WHERE board_no = ?; */
+    int countByBoardBoardNo(int boardNo);
+
 }
