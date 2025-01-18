@@ -50,17 +50,70 @@
 
 </head>
 
-<body class="d-flex flex-column bg-light font-fa">
+<body class="d-flex flex-column bg-light">
 
 <!-- Header-->
 <div th:replace="~{common/header :: header}"></div>
 
 <main class="flex-shrink-0">
 
+    <section>
+        <div id="communityCarousel" class="carousel slide" data-bs-ride="carousel">
+            <!-- Indicators -->
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#communityCarousel" data-bs-slide-to="0" class="active"
+                        aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#communityCarousel" data-bs-slide-to="1"
+                        aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#communityCarousel" data-bs-slide-to="2"
+                        aria-label="Slide 3"></button>
+            </div>
+
+            <!-- Slides -->
+            <div class="carousel-inner">
+                <!-- Slide 1 -->
+                <div class="carousel-item active bg-black text-light" data-bs-interval="4000">
+                    <div class="container text-center pt-3 pb-4">
+                        <h1 style="font-size: 1.5rem;">유쾌한 커뮤니티에 오신 것을 환영합니다!</h1>
+                        <p>😊 다양한 관심사를 가진 사람들이 모여 소통하고 정보를 공유하는 공간입니다 😊</p>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="carousel-item bg-black text-light" data-bs-interval="4000">
+                    <div class="container text-center pt-3 pb-4">
+                        <h1 style="font-size: 1.5rem;">다양한 게시판에서 소통하세요!</h1>
+                        <p>✨ 취미, 기술, 정보 등 다양한 주제를 다루는 게시판이 준비되어 있습니다 ✨</p>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="carousel-item bg-black text-light" data-bs-interval="4000">
+                    <div class="container text-center pt-3 pb-4">
+                        <h1 style="font-size: 1.5rem;">함께 만들어가는 공간</h1>
+                        <p>😎 새로운 게시글을 작성하고, 댓글로 의견을 나누세요 😎</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#communityCarousel"
+                    data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#communityCarousel"
+                    data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </section>
+
     <section class="py-5">
         <div class="container text-center">
             <div class="row justify-content-center">
-                <div class="col-md-2" th:each="categories : ${boardCategories}">
+                <div class="col-md-3 mb-4" th:each="categories : ${boardCategories}">
                     <!-- 대분류 출력 -->
                     <h5 class="fw-bold title-board" th:text="${categories.value[0].mainCateName}"></h5>
                     <ul class="list-board">
