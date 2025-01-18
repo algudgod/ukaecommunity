@@ -37,6 +37,17 @@
             overflow-x: hidden; /* 가로 스크롤 방지 */
         }
 
+        .pagination .page-link {
+            color: black;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: black;
+            color: white;
+            border-color: black;
+
+        }
+
     </style>
 
 </head>
@@ -71,9 +82,9 @@
                     <th style="width: 40px;"></th>
                     <th style="width: 120px;"></th>
                     <th style="width: 1000px;">제목</th>
-                    <th style="width: 150px; text-align: left;">작성자</th>
+                    <th style="width: 200px; text-align: left;">작성자</th>
                     <th style="width: 120px;">작성일</th>
-                    <th style="width: 150px;">조회</th>
+                    <th style="width: 120px;">조회</th>
                 </tr>
                 </thead>
 
@@ -101,6 +112,10 @@
                 </tr>
                 </tbody>
             </table>
+
+            <!-- 공통 Pagination -->
+            <div th:replace="~{common/pagination :: pagination(${currentPage}, ${totalPages}, ${baseUrl})}"
+            ></div>
 
             <!-- 글쓰기 버튼 -->
             <div class="d-flex justify-content-end mt-3 me-4">

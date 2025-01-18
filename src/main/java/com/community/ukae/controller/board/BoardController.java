@@ -2,6 +2,7 @@ package com.community.ukae.controller.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
 import com.community.ukae.dto.board.BoardResponseDTO;
+import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.enums.BoardTag;
@@ -30,6 +31,8 @@ public class BoardController {
     @GetMapping("boardList")
     public String boardList(@RequestParam String mainCategory,
                             @RequestParam String subCategory,
+                            @RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "10") int size,
                             HttpSession session,
                             Model model) {
 
@@ -41,15 +44,23 @@ public class BoardController {
         model.addAttribute("mainCategory", mainCategory); // @RequestParam 으로 전달받은 mainCategory String 값
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
 
-        List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory);
+        List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory, page, size);
         model.addAttribute("boards", boardResponse);
+
+        model.addAttribute("boardCategories", boardService.getAllCategories());
 
         int todayBoardCount = boardService.countTodayBoardByCategory(mainCategory, subCategory);
         model.addAttribute("todayBoardCount",todayBoardCount);
         int totalBoardCount = boardResponse.size();
         model.addAttribute("totalBoardCount",totalBoardCount);
 
-        model.addAttribute("boardCategories", boardService.getAllCategories());
+        int totalPages = boardService.getTotalPages(mainCategory, subCategory, size);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+
+        // Base URL 생성 (페이지네이션에서 링크로 사용)
+        String baseUrl = "/board/boardList?mainCategory=" + mainCategory + "&subCategory=" + subCategory + "&page=";
+        model.addAttribute("baseUrl", baseUrl);
 
         return "board/boardList";
 

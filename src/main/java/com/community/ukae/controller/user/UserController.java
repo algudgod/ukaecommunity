@@ -63,6 +63,9 @@ public class UserController {
             return "redirect:/";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
+
+            String kakaoLoginImageUrl = s3Service.getFileUrl("common/kakao_login_medium_narrow.png");
+            model.addAttribute("kakaoLoginImageUrl",kakaoLoginImageUrl);
             return "user/login";
         }
     }

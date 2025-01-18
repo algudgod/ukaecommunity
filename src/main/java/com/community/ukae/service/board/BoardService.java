@@ -149,13 +149,15 @@ public class BoardService {
         }
     }
 
-    // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환
-    public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory) {
-        logger.info("카테고리별 게시글 목록 조회 요청: MainCategory={}, SubCategory={}", mainCategory, subCategory);
+    // 특정 키테고리의 게시글 목록을 카테고리별 고유 번호와 함께 반환 (페이지네이션 추가)
+    public List<BoardResponseDTO> getBoardWithCategoryNumbers(String mainCategory, String subCategory, int page, int size) {
+        logger.info("카테고리별 게시글 목록 조회 요청: MainCategory={}, SubCategory={}, Page={}, Size={}", mainCategory, subCategory, page, size);
 
-        List<Object[]> rows = boardRepository.findByCategoryWithRowNumber(mainCategory, subCategory);
+        // 페이지네이션 계산
+        int offset = (page - 1) * size;
+        List<Object[]> rows = boardRepository.findByCategoryWithPagination(mainCategory, subCategory, size, offset);
 
-        logger.info("카테고리별 게시글 목록 조회 성공: MainCategory={}, SubCategory={}, 게시글 수={}", mainCategory, subCategory, rows.size());
+        logger.info("카테고리별 게시글 목록 조회 성공: MainCategory={}, SubCategory={}, Page={}, Size={}, 게시글 수={}", mainCategory, subCategory, page, size, rows.size());
 
         List<BoardResponseDTO> boards = new ArrayList<>();
         for (Object[] row : rows) {
@@ -263,6 +265,11 @@ public class BoardService {
         } else {
             logger.info("작성자 본인 조회로 인해 조회수 증가 안 함: boardNo={}, 작성자={}", boardNo, user.getLoginId());
         }
+    }
+
+    public int getTotalPages(String mainCategory, String subCategory, int size) {
+        int totalCount = boardRepository.countByMainCategoryAndSubCategory(mainCategory, subCategory);
+        return (int) Math.ceil((double) totalCount / size); // 총 게시글 수를 페이지 크기로 나눔
     }
 
 

@@ -1,7 +1,6 @@
 package com.community.ukae.repository.board;
 
 import com.community.ukae.entity.board.Board;
-import com.community.ukae.entity.imageFile.ImageFile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +16,7 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
     List<Board> findByMainCategoryAndSubCategory(String mainCategory, String subCategory);
     Optional<Board> findByBoardNo(int boardNo);
 
+    int countByMainCategoryAndSubCategory(String mainCategory, String subCategory);
 
     @Query(value = "SELECT " +
             "b.main_category, " +
@@ -32,8 +32,11 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "FROM board b " +
             "JOIN user u ON b.login_id = u.login_id " +
             "WHERE b.main_category = :mainCategory " +
-            "AND b.sub_category = :subCategory",
+            "AND b.sub_category = :subCategory " +
+            "LIMIT :limit OFFSET :offset",
             nativeQuery = true)
-    List<Object[]> findByCategoryWithRowNumber(@Param("mainCategory") String mainCategory,
-                                               @Param("subCategory") String subCategory);
+    List<Object[]> findByCategoryWithPagination(@Param("mainCategory") String mainCategory,
+                                               @Param("subCategory") String subCategory,
+                                               @Param("limit") int limit,
+                                               @Param("offset") int offset);
 }
