@@ -9,13 +9,13 @@
 
 <body>
 <!-- 공통 Pagination Fragment -->
-<div th:fragment="pagination (currentPage, totalPages, baseUrl)">
+<div th:fragment="pagination (currentPage, totalPages, pageUrl)">
 
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
             <!-- 이전 버튼 -->
             <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" aria-label="Previous" th:href="@{|${baseUrl}${currentPage - 1}|}">
+                <a class="page-link" aria-label="Previous" th:href="@{|${pageUrl}${currentPage - 1}|}">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
@@ -23,12 +23,12 @@
             <!-- 페이지 번호 -->
             <li class="page-item" th:each="page : ${#numbers.sequence(1, totalPages)}"
                 th:classappend="${page == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{|${baseUrl}${page}|}" th:text="${page}"></a>
+                <a class="page-link" th:href="@{|${pageUrl}${page}|}" th:text="${page}"></a>
             </li>
 
             <!-- 다음 버튼 -->
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" aria-label="Next" th:href="@{|${baseUrl}${currentPage + 1}|}">
+                <a class="page-link" aria-label="Next" th:href="@{|${pageUrl}${currentPage + 1}|}">
                     <span aria-hidden="true">&raquo;</span>
                 </a>
             </li>

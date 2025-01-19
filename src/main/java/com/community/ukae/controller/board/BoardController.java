@@ -39,28 +39,33 @@ public class BoardController {
         User user = (User) session.getAttribute("user");
         model.addAttribute("user", user);
 
+        // 대/소분류 카테고리 조회
         BoardCategory boardCategory = boardService.findBoardCategory(mainCategory, subCategory);
 
         model.addAttribute("mainCategory", mainCategory); // @RequestParam 으로 전달받은 mainCategory String 값
         model.addAttribute("subCategory", boardCategory); // BoardCategory Enum 객체
 
+        // 게시판 목록 가져오기 (페이지네이션 적용)
         List<BoardResponseDTO> boardResponse = boardService.getBoardWithCategoryNumbers(mainCategory, subCategory, page, size);
         model.addAttribute("boards", boardResponse);
-
+        // 모든 카테고리 정보
         model.addAttribute("boardCategories", boardService.getAllCategories());
 
+        // 새 글 수 계산 (오늘 작성된 게시글 수)
         int todayBoardCount = boardService.countTodayBoardByCategory(mainCategory, subCategory);
         model.addAttribute("todayBoardCount",todayBoardCount);
+        // 전체 글 수 계산 (현재 카테고리 내 전체 게시글 수)
         int totalBoardCount = boardResponse.size();
         model.addAttribute("totalBoardCount",totalBoardCount);
 
+        // 전체 페이지 수 계산 (전체 글 수 ÷ 페이지당 게시글 수)
         int totalPages = boardService.getTotalPages(mainCategory, subCategory, size);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
 
-        // Base URL 생성 (페이지네이션에서 링크로 사용)
-        String baseUrl = "/board/boardList?mainCategory=" + mainCategory + "&subCategory=" + subCategory + "&page=";
-        model.addAttribute("baseUrl", baseUrl);
+        // 페이지네이션 URL 생성 (페이지 이동 시 사용)
+        String pageUrl = "/board/boardList?mainCategory=" + mainCategory + "&subCategory=" + subCategory + "&page=";
+        model.addAttribute("pageUrl", pageUrl);
 
         return "board/boardList";
 

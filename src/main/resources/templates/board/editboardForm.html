@@ -276,20 +276,25 @@
         }
 
         fetch('/api/board/uploadImages', {
-            method: 'POST',
-            body: data,
-        })
-            .then(response => response.json())
-            .then(urls => {
-                urls.forEach(url => {
-                    console.log("Image uploaded:", url);
-                });
+                method: 'POST',
+                body: data,
             })
-            .catch(error => {
-                console.error("Image upload failed:", error);
-                alert("이미지 업로드 실패!");
-            });
-    }
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // JSON 응답 처리
+                })
+                .then(urls => {
+                    urls.forEach(url => {
+                        $('#content').summernote('insertImage', url);
+                    });
+                })
+                .catch(error => {
+                    console.error('Image upload failed:', error);
+                    alert('이미지 업로드 실패!');
+                });
+            }
 
 </script>
 </body>

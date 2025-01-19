@@ -257,16 +257,19 @@ public class BoardService {
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
 
-        // 작성자 본인의 조회는 조회수를 증가시키지 않음
-        if (user == null || !board.getUser().getLoginId().equals(user.getLoginId())) {
+        // 작성자 본인의 조회나 로그인하지 않은 경우, 조회수를 증가시키지 않음
+        if (user != null && !board.getUser().getLoginId().equals(user.getLoginId())) {
             board.setViewCount(board.getViewCount() + 1);
             boardRepository.save(board);
             logger.info("게시글 조회수 증가: boardNo={}, 현재 조회수={}", boardNo, board.getViewCount());
+        } else if (user == null) {
+            logger.info("로그인하지 않은 사용자로 인해 조회수 증가 안 함: boardNo={}", boardNo);
         } else {
             logger.info("작성자 본인 조회로 인해 조회수 증가 안 함: boardNo={}, 작성자={}", boardNo, user.getLoginId());
         }
     }
 
+    // 게시글 전체 페이지 수
     public int getTotalPages(String mainCategory, String subCategory, int size) {
         int totalCount = boardRepository.countByMainCategoryAndSubCategory(mainCategory, subCategory);
         return (int) Math.ceil((double) totalCount / size); // 총 게시글 수를 페이지 크기로 나눔

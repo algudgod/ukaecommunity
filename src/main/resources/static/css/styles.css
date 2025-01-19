@@ -12,8 +12,8 @@
  */
 
 @font-face {
-    font-family: "ChosunSg"; /* 사용할 폰트 이름 */
-    src: url("../fonts/ChosunSg.TTF") format("truetype"); /* 폰트 파일 경로 */
+    font-family: "HYHWPEQ"; /* 사용할 폰트 이름 */
+    src: url("../fonts/HYHWPEQ.TTF") format("truetype"); /* 폰트 파일 경로 */
 }
 
 :root {

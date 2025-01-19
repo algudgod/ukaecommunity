@@ -33,6 +33,7 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
             "JOIN user u ON b.login_id = u.login_id " +
             "WHERE b.main_category = :mainCategory " +
             "AND b.sub_category = :subCategory " +
+            "ORDER BY b.create_date DESC " +
             "LIMIT :limit OFFSET :offset",
             nativeQuery = true)
     List<Object[]> findByCategoryWithPagination(@Param("mainCategory") String mainCategory,

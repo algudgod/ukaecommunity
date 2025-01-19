@@ -82,9 +82,9 @@
                     <th style="width: 40px;"></th>
                     <th style="width: 120px;"></th>
                     <th style="width: 1000px;">제목</th>
-                    <th style="width: 200px; text-align: left;">작성자</th>
+                    <th style="width: 220px; text-align: left;">작성자</th>
                     <th style="width: 120px;">작성일</th>
-                    <th style="width: 120px;">조회</th>
+                    <th style="width: 100px;">조회</th>
                 </tr>
                 </thead>
 
@@ -114,7 +114,7 @@
             </table>
 
             <!-- 공통 Pagination -->
-            <div th:replace="~{common/pagination :: pagination(${currentPage}, ${totalPages}, ${baseUrl})}"
+            <div th:replace="~{common/pagination :: pagination(${currentPage}, ${totalPages}, ${pageUrl})}"
             ></div>
 
             <!-- 글쓰기 버튼 -->
