@@ -1,6 +1,8 @@
 package com.community.ukae.controller.board;
 
 import com.community.ukae.service.s3.S3Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +24,14 @@ public class BoardRestController {
 
     // 게시글 작성 시 다중 업로드
     @PostMapping("/uploadImages")
-    public List<String> uploadImages(@RequestParam("files") List<MultipartFile> files) throws IOException {
-        return s3Service.uploadFiles(files);
+    public ResponseEntity<?> uploadImages(@RequestParam("files") List<MultipartFile> files) {
+        try {
+            List<String> urls = s3Service.uploadFiles(files);
+            return ResponseEntity.ok(urls);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("이미지 업로드 중 오류가 발생했습니다.");
+        }
     }
 
 }

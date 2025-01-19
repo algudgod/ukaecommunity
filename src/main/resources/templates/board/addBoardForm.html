@@ -134,6 +134,8 @@
 
 <script>
 
+    let tempImageFiles = []; // 전역으로 선언
+
     document.addEventListener("DOMContentLoaded", function () {
         // 페이지 로드 시 초기 카테고리 설정 및 말머리 필터링
         const initialSubCategory = document.getElementById("subCategory").value; // 초기 subCategory 값 가져오기
@@ -142,18 +144,48 @@
             filterTagsBySubCategory(initialSubCategory); // 초기 태그 필터링
         }
 
-        // Form 제출 시 Summernote 내용을 동기화
+        // Form 제출 시 Summernote 내용을 동기화 및 이미지 업로드 처리
         const form = document.querySelector("form");
-        form.addEventListener("submit", function () {
-            // 서머노트의 실제 HTML 내용 가져오기
-            const content = $('#content').summernote('code');
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault(); // 기본 제출 동작 중단
 
-            // 디버깅: 서머노트에서 가져온 HTML 내용 출력
-            console.log("서머노트 HTML 내용:", content);
+            // Summernote 내용 가져오기
+            let content = $('#content').summernote('code');
+            console.log("Summernote HTML content:", content);
 
-            // textarea와 동기화 (필요 시)
-            const contentElement = document.getElementById("content");
-            contentElement.value = content; // Summernote 내용을 textarea에 동기화
+            // tempImageFiles 배열에 있는 이미지를 S3로 업로드
+            try {
+                // 이미지를 '/api/board/uploadImages' 서버로 전송하고, 반환된 S3 URL 가져오기
+                const imageUrls = await uploadImagesToS3(tempImageFiles);
+                console.log("S3에서 반환된 이미지 URLs:", imageUrls);
+
+                // Blob URL -> S3 URL 대체
+                console.log("대체 전 HTML content:", content);
+
+                imageUrls.forEach((url, index) => {
+                    const { blobUrl } = tempImageFiles[index]; // 저장된 Blob URL 참조
+                    console.log("Mapping Blob URL to S3 URL:", { blobUrl, s3Url: url });
+
+                    if (content.includes(`src="${blobUrl}"`)) {
+                        content = content.replace(`src="${blobUrl}"`, `src="${url}"`);
+                        console.log(`Replaced Blob URL: ${blobUrl} -> S3 URL: ${url}`);
+                    } else {
+                        console.warn(`Blob URL not found in content: ${blobUrl}`);
+                        console.log("Content being checked:", content);
+                    }
+                });
+
+                console.log("Updated Summernote HTML content with S3 URLs:", content);
+
+                // 최종 HTML 내용을 hidden textarea로 동기화
+                document.getElementById("content").value = content;
+
+                // 폼을 제출
+                form.submit();
+            } catch (error) {
+                console.error("오류 발생:", error);
+                alert("이미지 업로드 또는 게시글 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
         });
 
         // Summernote 초기화
@@ -214,6 +246,7 @@
         document.getElementById("tag").value = "";
     }
 
+    // summernote 초기화 함수
     function initializeSummernote() {
         // Summernote 초기화
         $('#content').summernote({
@@ -228,15 +261,26 @@
             ],
             callbacks: {
                 onImageUpload: function (files) {
-                    uploadImages(files); // 이미지 업로드 콜백 함수
+                    Array.from(files).forEach((file, index) => {
+                        try {
+                            const blobUrl = URL.createObjectURL(file); // Blob URL 생성
+                            if (!blobUrl) throw new Error(`Blob URL 생성 실패 for file at index ${index}`);
+
+                            tempImageFiles.push({ file, blobUrl }); // 파일과 Blob URL을 함께 저장
+                            $('#content').summernote('insertImage', blobUrl); // Summernote에 미리보기로 삽입
+                            console.log(`Blob URL 생성 성공: ${blobUrl}`);
+                        } catch (error) {
+                            console.error(`Blob URL 생성 실패:`, error, file);
+                        }
+                    });
                 },
-                onChange: function(contents) {
+                onChange: function (contents) {
                     $('#content').val(contents); // Summernote 내용을 hidden textarea에 동기화
                 }
             }
         });
 
-        // 서버에서 전달된 초기 내용 설정 (필요시)
+        // 서버에서 전달된 초기 내용 설정
         const initialContent = $('#content').val();
         if (initialContent) {
             $('#content').summernote('code', initialContent);
@@ -244,31 +288,31 @@
     }
 
     // 이미지 업로드 함수
-    function uploadImages(files) {
+    async function uploadImagesToS3(files) {
         const data = new FormData();
         for (let i = 0; i < files.length; i++) {
-            data.append("files", files[i]); // 다중 파일 추가
+            data.append("files", files[i].file);
+            console.log("Uploading file to S3:", files[i].file);
         }
 
-    fetch('/api/board/uploadImages', {
-        method: 'POST',
-        body: data,
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json(); // JSON 응답 처리
-        })
-        .then(urls => {
-            urls.forEach(url => {
-                $('#content').summernote('insertImage', url);
+        try {
+            const response = await fetch('/api/board/uploadImages', {
+                method: 'POST',
+                body: data,
             });
-        })
-        .catch(error => {
-            console.error('Image upload failed:', error);
-            alert('이미지 업로드 실패!');
-        });
+
+            if (!response.ok) {
+                throw new Error('이미지 업로드 실패');
+            }
+
+            const urls = await response.json(); // 서버에서 반환된 S3 URL 배열
+            console.log("Image URLs from S3:", urls);
+            return urls;
+        } catch (error) {
+            console.error("이미지 업로드 중 오류:", error);
+            alert("이미지 업로드 중 오류가 발생했습니다.");
+            return [];
+        }
     }
 
 </script>

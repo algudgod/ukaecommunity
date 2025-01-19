@@ -126,6 +126,8 @@ public class BoardController {
             BoardCategory boardCategory = BoardCategory.valueOf(boardRequest.getSubCategory());
             model.addAttribute("subCategory", boardCategory);
             model.addAttribute("boardRequest", boardRequest);
+            logger.info("Content received on server: {}", boardRequest.getContent());
+
             return "board/addBoardForm";
         }
 
