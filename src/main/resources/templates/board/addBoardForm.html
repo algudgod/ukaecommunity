@@ -98,6 +98,7 @@
                 <input type="hidden" th:field="*{mainCategory}"/>
                 <input type="hidden" th:field="*{subCategory}"/>
                 <input type="hidden" th:field="*{tag}"/>
+                <input type="hidden" name="imageUrls" id="imageUrls"/>
 
                 <!-- 제목 입력 -->
                 <div class="mb-3">
@@ -265,7 +266,6 @@
                         try {
                             const blobUrl = URL.createObjectURL(file); // Blob URL 생성
                             if (!blobUrl) throw new Error(`Blob URL 생성 실패 for file at index ${index}`);
-
                             tempImageFiles.push({ file, blobUrl }); // 파일과 Blob URL을 함께 저장
                             $('#content').summernote('insertImage', blobUrl); // Summernote에 미리보기로 삽입
                             console.log(`Blob URL 생성 성공: ${blobUrl}`);
@@ -305,8 +305,14 @@
                 throw new Error('이미지 업로드 실패');
             }
 
-            const urls = await response.json(); // 서버에서 반환된 S3 URL 배열
+            // 서버에서 반환된 S3 URL 배열
+            const urls = await response.json();
             console.log("Image URLs from S3:", urls);
+
+            // S3 URL 리스트를 hidden input 에 추가
+            const imageUrlInput = document.getElementById('imageUrls');
+            imageUrlInput.value = JSON.stringify(urls); // 서버로 보낼 JSON 형태로 변환
+
             return urls;
         } catch (error) {
             console.error("이미지 업로드 중 오류:", error);

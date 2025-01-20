@@ -110,7 +110,7 @@
         <div class="col-md-9">
             <!-- 목록, 수정, 삭제 버튼 -->
             <div class="d-flex justify-content-between mb-3">
-                <a th:href="@{/board/boardList(mainCategory=${board.mainCategory}, subCategory=${board.subCategory})}"
+                <a href="javascript:window.history.back();"
                    class="btn btn-sm btn-outline-secondary">목록</a>
                 <div>
                     <a th:if="${user != null and user.nickname == board.nickname}"

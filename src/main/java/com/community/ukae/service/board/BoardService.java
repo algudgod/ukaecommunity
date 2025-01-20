@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -30,6 +31,8 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ImageFileRepository imageFileRepository;
     private final CommentRepository commentRepository;
+
+    private final S3Service s3Service;
 
     // mainCategory 와 subCategory 에 해당하는 BoardCategory(Enum 상수)를 반환 (특정조건)
     public BoardCategory findBoardCategory(String mainCategory, String subCategory) {
@@ -66,6 +69,7 @@ public class BoardService {
         validateAddBoardRequest(boardRequest);
 
         try {
+            // 1. 게시글 객체 생성 및 저장
             Board board = new Board();
             board.setMainCategory(boardRequest.getMainCategory());
             board.setSubCategory(boardRequest.getSubCategory());
@@ -75,8 +79,21 @@ public class BoardService {
             board.setUser(user);
 
             boardRepository.save(board);
+
+            // 2. 이미지 URL 리스트 저장
+            List<String> imageUrls = boardRequest.getImageUrls();
+            if (imageUrls != null && !imageUrls.isEmpty()) {
+                for (String url : imageUrls) {
+                    ImageFile imageFile = new ImageFile();
+                    imageFile.setBoard(board); // 게시글과 연관 설정
+                    imageFile.setImageUrl(url); // 업로드된 이미지 URL 저장
+                    imageFileRepository.save(imageFile); // DB에 저장
+                }
+            }
+
             logger.info("게시글 저장 성공: BoardNo={}", board.getBoardNo());
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             logger.error("게시글 저장 실패: {}", e.getMessage());
             throw e;
         }

@@ -2,10 +2,10 @@ package com.community.ukae.controller.board;
 
 import com.community.ukae.dto.board.BoardRequestDTO;
 import com.community.ukae.dto.board.BoardResponseDTO;
-import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.enums.BoardCategory;
 import com.community.ukae.enums.BoardTag;
+import com.community.ukae.repository.board.BoardRepository;
 import com.community.ukae.service.board.BoardService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ public class BoardController {
     private static final Logger logger = LoggerFactory.getLogger(BoardController.class);
 
     private final BoardService boardService;
+    private final BoardRepository boardRepository;
 
     // 게시판 목록
     @GetMapping("boardList")
@@ -55,7 +56,7 @@ public class BoardController {
         int todayBoardCount = boardService.countTodayBoardByCategory(mainCategory, subCategory);
         model.addAttribute("todayBoardCount",todayBoardCount);
         // 전체 글 수 계산 (현재 카테고리 내 전체 게시글 수)
-        int totalBoardCount = boardResponse.size();
+        int totalBoardCount = boardRepository.countByMainCategoryAndSubCategory(mainCategory, subCategory);
         model.addAttribute("totalBoardCount",totalBoardCount);
 
         // 전체 페이지 수 계산 (전체 글 수 ÷ 페이지당 게시글 수)

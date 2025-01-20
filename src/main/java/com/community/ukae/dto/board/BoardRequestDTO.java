@@ -36,6 +36,7 @@ public class BoardRequestDTO {
     private int categoryBoardNo;
 
     private List<MultipartFile> images;
+    private List<String> imageUrls;
 
     private String tag;
 
