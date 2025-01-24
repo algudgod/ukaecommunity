@@ -35,6 +35,10 @@ public class KakaoController {
     public String kakaoLogin(OAuth2AuthenticationToken authentication, HttpSession session, Model model) {
         try {
             KakaoRequestDTO kakaoUserInfo = kakaoService.getKakaoUserInfo(authentication);
+
+            String kakaoLoginImageUrl = s3Service.getFileUrl("common/kakao_login_medium_narrow.png");
+            model.addAttribute("kakaoLoginImageUrl", kakaoLoginImageUrl);
+
             return kakaoService.LoginForKaKao(kakaoUserInfo, session, model, s3Service);
         } catch (Exception e) {
             logger.error("카카오 로그인 처리 중 오류 발생", e);

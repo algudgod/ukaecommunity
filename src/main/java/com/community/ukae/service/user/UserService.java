@@ -45,7 +45,6 @@ public class UserService {
         return userRepository.findByNameAndEmail(name, email);
     }
 
-
     // 회원 등록
     public void addUser(UserRequestDTO userRequest) {
         logger.info("회원 등록 요청: loginId={}", userRequest.getLoginId());

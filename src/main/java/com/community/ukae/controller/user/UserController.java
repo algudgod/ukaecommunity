@@ -71,11 +71,11 @@ public class UserController {
     }
 
     // 회원 로그아웃
-    @GetMapping("logout")
-    public String logout(HttpSession session) {
-        session.removeAttribute("user");
-        return "redirect:/";
-    }
+    //@GetMapping("logout")
+    //public String logout(HttpSession session) {
+    //    session.removeAttribute("user");
+    //    return "redirect:/";
+    //}
 
     // 회원 정보 조회
     @GetMapping("userInfo")

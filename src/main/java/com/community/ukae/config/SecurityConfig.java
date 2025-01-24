@@ -21,6 +21,12 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2 // OAuth2 설정
                         .defaultSuccessUrl("/kakao/addUser", false) // 인증 성공 후 리다이렉트 경로
                         .failureUrl("/error") // 인증 실패 시 이동 경로
+                )
+                .logout(logout -> logout // 로그아웃 설정
+                        .logoutUrl("/user/logout") // 로그아웃 URL
+                        .logoutSuccessUrl("/") // 로그아웃 성공 후 리다이렉트 경로
+                        .invalidateHttpSession(true) // 세션 무효화
+                        .deleteCookies("JSESSIONID") // 쿠키 삭제
                 );
         return http.build();
     }

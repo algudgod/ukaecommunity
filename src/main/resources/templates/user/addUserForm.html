@@ -257,7 +257,7 @@
       }
 
       // 정규식 검사
-      const regex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&*]).*$/
+      const regex = /^[a-z][a-z0-9]{4,19}$/;
       if(!regex.test(password)){
         setResultMessage(resultPassword, "비밀번호는 영문자와 특수문자를 반드시 포함해야 합니다.", false);
         return;
