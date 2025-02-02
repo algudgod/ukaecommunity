@@ -8,11 +8,14 @@ import com.community.ukae.entity.user.User;
 import com.community.ukae.repository.board.BoardRepository;
 import com.community.ukae.repository.comment.CommentRepository;
 import com.community.ukae.service.board.BoardService;
+import com.community.ukae.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
+    private final S3Service s3Service;
 
     // 게시글 조회
     public Board findBoardEntityByBoardNo(int boardNo) {
@@ -34,7 +38,7 @@ public class CommentService {
     }
 
     // 댓글 생성
-    public CommentResponseDTO addComment(CommentRequestDTO commentRequest, User user) {
+    public CommentResponseDTO addComment(CommentRequestDTO commentRequest, User user, MultipartFile imageFile) throws IOException {
         logger.info("댓글 생성 요청: boardNo={}, content={}, user={}",
                 commentRequest.getBoardNo(), commentRequest.getContent(), user.getNickname());
 
@@ -48,7 +52,13 @@ public class CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
-        logger.info("댓글 저장 완료");
+        logger.info("댓글 저장 완료: commentNo={}", savedComment.getCommentNo());
+
+        // 이미지 업로드 처리
+        if (imageFile != null && !imageFile.isEmpty()) {
+            s3Service.uploadCommentImage(imageFile, savedComment.getCommentNo());
+            logger.info("댓글 이미지 업로드 완료: commentNo={}", savedComment.getCommentNo());
+        }
 
         return CommentResponseDTO.builder()
                 .commentNo(savedComment.getCommentNo())
