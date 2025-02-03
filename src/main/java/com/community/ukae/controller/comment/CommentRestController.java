@@ -4,6 +4,7 @@ import com.community.ukae.dto.comment.CommentRequestDTO;
 import com.community.ukae.dto.comment.CommentResponseDTO;
 import com.community.ukae.entity.comment.Comment;
 import com.community.ukae.entity.user.User;
+import com.community.ukae.repository.comment.CommentRepository;
 import com.community.ukae.service.comment.CommentService;
 import com.community.ukae.service.s3.S3Service;
 import jakarta.servlet.http.HttpSession;
@@ -24,22 +25,33 @@ import java.util.List;
 @Slf4j
 public class CommentRestController {
 
+    private final CommentRepository commentRepository;
     private final CommentService commentService;
     private final S3Service s3Service;
 
+    // 댓글 저장
     @PostMapping("/addComment")
     public ResponseEntity<CommentResponseDTO> addComment(@RequestParam(value = "file", required = false) MultipartFile file,
                                                          @RequestParam("content") String content,
                                                          @RequestParam("boardNo") int boardNo,
                                                          HttpSession session) {
-        try {
-            log.info("댓글 등록 요청: content={}, boardNo={}", content, boardNo);
+/*        // 세션에서 사용자 정보 가져오기
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            log.warn("댓글 등록 요청 실패: 사용자 인증 필요");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }*/
+        // 테스트용 사용자 설정
+        User user = (User) session.getAttribute("user");
+        if (user == null) { // 세션에 사용자 정보가 없을 때
+            user = new User();
+            user.setLoginId("nurungzi");
+            user.setNickname("누룽지");
+            session.setAttribute("user", user); // 세션에 저장
+        }
 
-            // 세션에서 사용자 정보 가져오기
-            User user = (User) session.getAttribute("user");
-            if (user == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+        try {
+            log.info("댓글 등록 요청: user={}, content={}, boardNo={}", user.getLoginId(), content, boardNo);
 
             // 댓글 요청 DTO 생성
             CommentRequestDTO commentRequest = new CommentRequestDTO();
@@ -48,12 +60,29 @@ public class CommentRestController {
 
             // 댓글 생성 및 저장
             CommentResponseDTO savedComment = commentService.addComment(commentRequest, user, file);
-
+            log.info("댓글 등록 완료: commentNo={}, user={}", savedComment.getCommentNo(), user.getLoginId());
             return ResponseEntity.status(HttpStatus.CREATED).body(savedComment);
-
         } catch (Exception e) {
-            log.error("댓글 등록 중 오류 발생", e);
+            log.error("댓글 등록 중 오류 발생: user={}, content={}, boardNo={}, 이유={}",
+                    user.getLoginId(), content, boardNo, e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // 댓글 이미지 업로드 (수정 또는 등록된 댓글에 추가)
+    @PostMapping("/uploadCommentImage")
+    public ResponseEntity<String> uploadCommentImage(@RequestParam("file") MultipartFile file,
+                                                     @RequestParam("commentNo") int commentNo) {
+        try {
+            // 댓글 조회
+            Comment comment = commentService.findCommentByCommentNo(commentNo);
+            // 이미지 업로드
+            commentService.uploadCommentImage(file, comment);
+            log.info("댓글 이미지 업로드 완료: commentNo={}", commentNo);
+            return ResponseEntity.ok("이미지 업로드 성공");
+        } catch (Exception e) {
+            log.error("댓글 이미지 업로드 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
         }
     }
 

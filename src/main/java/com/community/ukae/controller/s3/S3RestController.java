@@ -72,20 +72,6 @@ public class S3RestController {
         }
     }
 
-    // 댓글 이미지 업로드
-    @PostMapping("/uploadCommentImage")
-    public ResponseEntity<String> uploadCommentImage(@RequestParam("file") MultipartFile file,
-                                                     @RequestParam("commentNo") int commentNo) {
-        try {
-            String fileUrl = s3Service.uploadCommentImage(file, commentNo);
-            logger.info("댓글 이미지 업로드 성공: commentNo={}, fileUrl={}",commentNo, fileUrl);
-            return ResponseEntity.ok(fileUrl);
-        } catch (Exception e) {
-            logger.error("댓글 이미지 업로드 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
-        }
-    }
-
     @PostMapping("uploadFiles")
     public ResponseEntity<?> uploadFiles(@RequestParam("files") List<MultipartFile> files) {
         try {
