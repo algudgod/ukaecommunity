@@ -65,25 +65,6 @@ public class S3Service {
         return fileUrl;
     }
 
-    // 댓글 이미지 단일 업로드
-    public String uploadCommentImage(MultipartFile file, int commentNo) throws IOException {
-
-        // 댓글 조회
-        Comment comment = commentRepository.findByCommentNo(commentNo)
-                .orElseThrow(() -> new IllegalArgumentException("해당 댓글을 찾을 수 없습니다. commentNo=" + commentNo));
-
-        String fileUrl = uploadFile(file); // 단일 파일 업로드 호출
-
-        ImageFile imageFile = new ImageFile();
-        imageFile.setComment(comment); // 댓글과 연결
-        imageFile.setBoard(comment.getBoard()); // 댓글에 연결된 게시글과 연결
-        imageFile.setImageUrl(fileUrl); // 반환 받은 S3 Url 저장
-        imageFileRepository.save(imageFile); // DB에 저장
-        logger.info("댓글 이미지 업로드 성공: commentNo={}, originalFilename={}", commentNo, fileUrl);
-
-        return fileUrl;
-    }
-
     // 다중 이미지 업로드
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
 

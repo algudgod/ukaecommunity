@@ -218,7 +218,12 @@
                                 ></textarea>
                             </div>
 
+                            <!-- 이미지 미리보기 -->
+                            <img id="preview" class="mt-3 d-none"
+                                 style="width: 150px; height: 150px; object-fit: cover;"/>
+
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+
                                 <!-- 이미지 첨부 버튼 -->
                                 <div>
                                     <label for="comment-file" class="btn btn-outline-secondary btn-sm me-2"
@@ -226,8 +231,9 @@
                                         <i class="bi bi-image"></i>
                                     </label>
                                     <input type="file" id="comment-file" name="file" class="form-control d-none"
-                                           accept="image/*">
+                                           accept="image/*" onchange="previewImage()">
                                 </div>
+
                                 <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px;">
                                     <!-- 글자 수 카운트 -->
                                     <div style="font-size: 13px; margin-right: 10px;" class="me-3">
@@ -328,6 +334,24 @@
         return date.toISOString().slice(2, 10).replace(/-/g, ".");
     }
 
+    // 댓글에 첨부된 이미지 미리보기 함수
+    function previewImage() {
+        const input = document.getElementById("comment-file");
+        const preview = document.getElementById("preview");
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.addEventListener("load", (e) => {
+                preview.src = e.target.result;
+                preview.classList.remove("d-none");  // 미리보기 보이게
+            });
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = "";
+            preview.classList.add("d-none");  // 이미지 없으면 숨기기
+        }
+    }
+
     // 댓글 등록 함수
     function addComment(event) {
         event.preventDefault(); // 기본 폼 제출 동작 방지
@@ -426,6 +450,19 @@
     function clearCommentInput() {
         document.querySelector("textarea[name='content']").value = ""; // 입력창 내용 초기화
         document.getElementById("char-count").textContent = "0"; // 글자 수 초기화
+
+        // 미리보기 이미지 초기화
+        const preview = document.getElementById("preview");
+        const input = document.getElementById("comment-file"); // 파일 선택창
+
+        if (preview) {
+            preview.src = "";
+            preview.classList.add("d-none"); // 미리보기 숨기기
+        }
+
+        if (input) {
+            input.value = ""; // 파일 선택 초기화
+        }
     }
 
     // 페이지 로드 시 댓글 목록 자동 로드 및 댓글 열고 닫기 로직 추가
