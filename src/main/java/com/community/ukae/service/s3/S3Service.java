@@ -1,6 +1,10 @@
 package com.community.ukae.service.s3;
 
+import com.community.ukae.entity.comment.Comment;
+import com.community.ukae.entity.imageFile.ImageFile;
 import com.community.ukae.entity.user.User;
+import com.community.ukae.repository.comment.CommentRepository;
+import com.community.ukae.repository.imageFile.ImageFileRepository;
 import com.community.ukae.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -14,6 +18,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +30,8 @@ public class S3Service {
 
     private final S3Client s3Client;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final ImageFileRepository imageFileRepository;
 
     @Value("${cloud.aws.s3.bucket-name}")
     private String bucketName;
@@ -49,6 +56,7 @@ public class S3Service {
         }
     }
 
+    // 프로필 단일 이미지 업로드
     public String uploadUserProfile(MultipartFile file, User user) throws IOException {
         String fileUrl = uploadFile(file); // 공통 파일 업로드 호출
         user.setProfileUrl(fileUrl);
@@ -59,6 +67,11 @@ public class S3Service {
 
     // 다중 이미지 업로드
     public List<String> uploadFiles(List<MultipartFile> files) throws IOException {
+
+        if (files == null || files.isEmpty()) {
+            logger.info("업로드할 파일이 없습니다.");
+            return Collections.emptyList();
+        }
         logger.info("다중 파일 업로드 시작: 파일 수={}", files.size());
         List<String> fileUrls = new ArrayList<>();
 

@@ -4,15 +4,19 @@ import com.community.ukae.dto.comment.CommentRequestDTO;
 import com.community.ukae.dto.comment.CommentResponseDTO;
 import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.comment.Comment;
+import com.community.ukae.entity.imageFile.ImageFile;
 import com.community.ukae.entity.user.User;
 import com.community.ukae.repository.board.BoardRepository;
 import com.community.ukae.repository.comment.CommentRepository;
-import com.community.ukae.service.board.BoardService;
+import com.community.ukae.repository.imageFile.ImageFileRepository;
+import com.community.ukae.service.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,8 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final BoardRepository boardRepository;
+    private final ImageFileRepository imageFileRepository;
+    private final S3Service s3Service;
 
     // 게시글 조회
     public Board findBoardEntityByBoardNo(int boardNo) {
@@ -34,12 +40,14 @@ public class CommentService {
     }
 
     // 댓글 생성
-    public CommentResponseDTO addComment(CommentRequestDTO commentRequest, User user) {
+    public CommentResponseDTO addComment(CommentRequestDTO commentRequest, User user, MultipartFile imageFile) throws IOException {
         logger.info("댓글 생성 요청: boardNo={}, content={}, user={}",
                 commentRequest.getBoardNo(), commentRequest.getContent(), user.getNickname());
 
+        // 게시글 조회
         Board board = findBoardEntityByBoardNo(commentRequest.getBoardNo());
 
+        // 댓글 엔티티 생성 및 설정
         Comment comment = Comment.builder()
                 .content(commentRequest.getContent())
                 .user(user)
@@ -47,8 +55,15 @@ public class CommentService {
                 .createDate(LocalDateTime.now())
                 .build();
 
+        // 댓글 저장
         Comment savedComment = commentRepository.save(comment);
-        logger.info("댓글 저장 완료");
+        logger.info("댓글 저장 완료: commentNo={}", savedComment.getCommentNo());
+
+        // 이미지 업로드 처리
+        if (imageFile != null && !imageFile.isEmpty()) {
+            uploadCommentImage(imageFile, savedComment);
+            logger.info("댓글 이미지 업로드 완료: commentNo={}", savedComment.getCommentNo());
+        }
 
         return CommentResponseDTO.builder()
                 .commentNo(savedComment.getCommentNo())
@@ -56,6 +71,22 @@ public class CommentService {
                 .nickname(savedComment.getUser().getNickname())
                 .createDate(savedComment.getCreateDate())
                 .build();
+    }
+
+    // 댓글 이미지 단일 업로드
+    public void uploadCommentImage(MultipartFile file, Comment comment) throws IOException {
+
+        String fileUrl = s3Service.uploadFile(file); // 공통 S3 업로드 호출
+
+        // 이미지 엔티티 생성 및 설정
+        ImageFile imageFile = ImageFile.builder()
+                .comment(comment) // 댓글과 연결
+                .board(comment.getBoard()) // 댓글에 연결된 게시글과 연결
+                .imageUrl(fileUrl) // 반환 받은 S3 Url 저장
+                .build();
+
+        imageFileRepository.save(imageFile); // DB에 저장
+        logger.info("댓글 이미지 업로드 성공: commentNo={}, imageUrl={}", comment.getCommentNo(), fileUrl);
     }
 
     // 댓글 목록
@@ -85,9 +116,7 @@ public class CommentService {
         logger.info("댓글 수정 요청: commentNo={}, content={}", commentNo, commentRequest.getContent());
 
         // 댓글 조회
-        Comment comment = commentRepository.findByCommentNo(commentNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 댓글을 찾을 수 없습니다."));
-
+        Comment comment = findCommentByCommentNo(commentNo);
 
         // 수정 권한 확인
         if (!comment.getUser().getLoginId().equals(user.getLoginId())) {
@@ -113,8 +142,8 @@ public class CommentService {
     public void deleteComment(int commentNo, User user) {
         logger.info("댓글 삭제 요청: commentNo={}, user={}", commentNo, user.getNickname());
 
-        Comment comment = commentRepository.findById(commentNo)
-                .orElseThrow(() -> new NoSuchElementException("해당 댓글을 찾을 수 없습니다."));
+        // 댓글 조회
+        Comment comment = findCommentByCommentNo(commentNo);
 
         // 댓글 작성자 검증
         if (!comment.getUser().getLoginId().equals(user.getLoginId())) {
@@ -125,5 +154,10 @@ public class CommentService {
         logger.info("댓글 삭제 완료: commentNo={}", commentNo);
     }
 
+    // 댓글 조회
+    public Comment findCommentByCommentNo(int commentNo){
+        return commentRepository.findByCommentNo(commentNo)
+                .orElseThrow(() -> new NoSuchElementException("해당 댓글을 찾을 수 없습니다."));
+    }
 
 }

@@ -166,6 +166,10 @@
                 <!-- 댓글 제목 -->
                 <h5 id="toggle-comments" style="cursor: pointer; margin-bottom: 1rem; font-size:15px;">
                     댓글
+                    <a th:if="${board.commentCount > 0}"
+                       style="font-size: 11px; color: red; font-weight: bold; margin-left: 5px; mb-1"
+                       th:text="${board.commentCount}">
+                    </a>
                 </h5>
                 <!-- 댓글 영역 -->
                 <div id="comment-section">
@@ -197,26 +201,52 @@
 
                     <hr>
 
-                    <form id="commentForm" onsubmit="addComment(event)">
-                        <div class="form-group">
-                                    <textarea
-                                            id="comment-content"
-                                            class="form-control"
-                                            name="content"
-                                            rows="4"
-                                            maxlength="300"
-                                            th:placeholder="${user == null} ? '로그인 후 작성할 수 있습니다.' : '댓글을 입력하세요'"
-                                            th:disabled="${user == null}"
-                                            required
-                                    ></textarea>
-                            <div style="text-align: right; font-size: 13px;">
-                                <span id="char-count">0</span>/300
+                    <!-- 댓글 작성 폼 -->
+                    <form id="commentForm" onsubmit="addComment(event)" enctype="multipart/form-data">
+                        <div style="border: 1px solid #ccc; border-radius: 5px; padding: 10px; margin-top: 15px;">
+                            <div class="form-group">
+                                <!-- 텍스트 입력 -->
+                                <textarea
+                                        id="comment-content"
+                                        class="form-control"
+                                        name="content"
+                                        rows="4"
+                                        maxlength="300"
+                                        th:placeholder="${user == null} ? '로그인 후 작성할 수 있습니다.' : '댓글을 입력하세요'"
+                                        th:disabled="${user == null}"
+                                        required
+                                ></textarea>
                             </div>
-                        </div>
-                        <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-                            <button type="submit" class="btn btn-sm btn-dark mb-3" style="font-size: 14px;"
-                                    th:if="${user != null}">등록
-                            </button>
+
+                            <!-- 이미지 미리보기 -->
+                            <img id="preview" class="mt-3 d-none"
+                                 style="width: 150px; height: 150px; object-fit: cover;"/>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+
+                                <!-- 이미지 첨부 버튼 -->
+                                <div>
+                                    <label for="comment-file" class="btn btn-outline-secondary btn-sm me-2"
+                                           th:if="${user != null}">
+                                        <i class="bi bi-image"></i>
+                                    </label>
+                                    <input type="file" id="comment-file" name="file" class="form-control d-none"
+                                           accept="image/*" onchange="previewImage()">
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 10px;">
+                                    <!-- 글자 수 카운트 -->
+                                    <div style="font-size: 13px; margin-right: 10px;" class="me-3">
+                                        <span id="char-count">0</span>/300
+                                    </div>
+                                    <!-- 등록 버튼 -->
+                                    <button type="submit" class="btn btn-sm btn-dark mb-3" style="font-size: 14px;"
+                                            th:if="${user != null}">
+                                        등록
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                     </form>
                 </div>
@@ -243,7 +273,6 @@
                 "Content-Type": "application/json"
             }
         })
-
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`서버 오류: ${response.status}`);
@@ -284,7 +313,8 @@
                 clone.querySelector(".comment-edit-btn").onclick = () => updateComment(comment.commentNo);
                 clone.querySelector(".comment-delete-btn").onclick = () => deleteComment(comment.commentNo);
             } else {
-                clone.querySelector(".comment-actions").remove(); // 작성자가 아니면 버튼 제거
+                const actions = clone.querySelector(".comment-actions");
+                if (actions) actions.style.display = "none"; // 작성자가 아니면 버튼 숨김
             }
             commentList.appendChild(clone); // 댓글 리스트에 추가
         });
@@ -304,13 +334,33 @@
         return date.toISOString().slice(2, 10).replace(/-/g, ".");
     }
 
+    // 댓글에 첨부된 이미지 미리보기 함수
+    function previewImage() {
+        const input = document.getElementById("comment-file");
+        const preview = document.getElementById("preview");
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.addEventListener("load", (e) => {
+                preview.src = e.target.result;
+                preview.classList.remove("d-none");  // 미리보기 보이게
+            });
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = "";
+            preview.classList.add("d-none");  // 이미지 없으면 숨기기
+        }
+    }
+
     // 댓글 등록 함수
     function addComment(event) {
-        event.preventDefault(); // 폼의 기본 동작 방지
+        event.preventDefault(); // 기본 폼 제출 동작 방지
 
-        // 댓글 입력 값과 게시글 번호 가져오기
+        // FormData 객체 생성
+        const formData = new FormData();
         const content = document.querySelector("textarea[name='content']").value.trim(); // 댓글 내용
-        const boardNo = document.querySelector("#boardNo").value; // 게시글 번호 (hidden input)
+        const boardNo = document.querySelector("#boardNo").value; // 게시글 번호
+        const fileInput = document.querySelector("#comment-file"); // 파일 인풋
 
         // 입력 값 검증
         if (!content) {
@@ -318,29 +368,31 @@
             return;
         }
 
-        // 서버로 보낼 데이터 객체 생성
-        const commentData = { boardNo, content };
-        console.log("전송 데이터:", commentData);
+        // FormData에 데이터 추가
+        formData.append("content", content); // 댓글 내용 추가
+        formData.append("boardNo", boardNo); // 게시글 번호 추가
+        if (fileInput.files.length > 0) {
+            formData.append("file", fileInput.files[0]); // 파일 추가
+        }
 
         // 서버에 데이터 전송
         fetch("/api/comment/addComment", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(commentData),
+            body: formData, // FormData 객체 전송
         })
             .then(response => {
                 if (!response.ok) { // 응답 상태 확인
-                    if (response.status === 401) { // 인증이 되지 않은 경우
+                    if (response.status === 401) { // 인증이 필요한 경우
                         alert("로그인이 필요합니다.");
                         window.location.href = "/user/login"; // 로그인 페이지로 이동
                     }
-                     throw new Error(`서버 오류: ${response.status}`);
+                    throw new Error(`서버 오류: ${response.status}`);
                 }
-                return response.json(); // JSON 데이터로 변환
+                return response.json(); // JSON 응답 파싱
             })
             .then(data => {
                 console.log("addComment 서버에서 받은 데이터:", data);
-                updateCommentList(data); // 댓글 리스트 업데이트(새 댓글 추가)
+                updateCommentList(data); // 댓글 리스트 업데이트
                 clearCommentInput(); // 입력창 초기화
             })
             .catch(error => {
@@ -354,45 +406,63 @@
         console.log("updateCommentList 서버 응답 데이터:", data); // 데이터 확인
 
         const commentList = document.querySelector(".comment-list");
-        const template = document.querySelector("#comment-template"); // 템플릿 가져오기
-
-        if (!template) {
-            console.error("댓글 템플릿을 찾을 수 없습니다.");
-            return;
-        }
+        const template = document.getElementById("comment-template"); // 원본 템플릿 가져오기
+        console.log("가져온 template:", template); // 템플릿 내용을 확인
         const newComment = template.cloneNode(true); // 템플릿 복사
-
         console.log("복사된 템플릿:", newComment); // 템플릿 내용을 확인
 
         newComment.style.display = "block"; // 숨겨진 템플릿 표시
+        newComment.setAttribute("data-comment-no", data.commentNo);
         newComment.querySelector(".comment-nickname").textContent = data.nickname || "익명"; // 닉네임
         newComment.querySelector(".comment-date").textContent = formatDate(data.createDate); // 날짜 포맷
         newComment.querySelector(".comment-content").textContent = data.content || ""; // 댓글 내용
 
-    // 수정/삭제 버튼 추가
-    const loggedInUserNickname = document.getElementById("loggedInUserNickname").value;
+        // 수정/삭제 버튼 추가
+        const loggedInUserNickname = document.getElementById("loggedInUserNickname").value;
 
-    if (data.nickname === loggedInUserNickname) {
-        // 본인 댓글인 경우 수정/삭제 버튼 활성화
         const editButton = newComment.querySelector(".comment-edit-btn");
         const deleteButton = newComment.querySelector(".comment-delete-btn");
-
-        if (editButton) editButton.onclick = () => updateComment(data.commentNo);
-        if (deleteButton) deleteButton.onclick = () => deleteComment(data.commentNo);
-    } else {
-        // 본인 댓글이 아닌 경우 수정/삭제 버튼 그룹 제거
         const actions = newComment.querySelector(".comment-actions");
-        if (actions) actions.remove();
-    }
 
-    // 댓글 리스트에 새 댓글 추가
-    commentList.appendChild(newComment);
+
+        // 본인 댓글인 경우 수정/삭제 버튼 보이게 설정
+        if (data.nickname === loggedInUserNickname) {
+            console.log("data nickname 확인:", data.nickname);
+            console.log("loggedInUserNickname 확인:", loggedInUserNickname);
+
+            // 수정/삭제 버튼을 보이게 설정
+            if (actions) actions.style.display = "block";  // 작성자 일치한다면, 버튼 다시 보이게 설정
+
+            // 버튼 클릭 이벤트 추가
+            if (editButton) editButton.onclick = () => updateComment(data.commentNo);
+            if (deleteButton) deleteButton.onclick = () => deleteComment(data.commentNo);
+        } else {
+            // 본인 댓글이 아닌 경우 수정/삭제 버튼 숨김 처리
+            if (editButton) editButton.style.display = "none"; // 수정 버튼 숨김
+            if (deleteButton) deleteButton.style.display = "none"; // 삭제 버튼 숨김
+        }
+
+        // 댓글 리스트에 새 댓글 추가
+        commentList.appendChild(newComment);
     }
 
     // 입력창 초기화
     function clearCommentInput() {
         document.querySelector("textarea[name='content']").value = ""; // 입력창 내용 초기화
         document.getElementById("char-count").textContent = "0"; // 글자 수 초기화
+
+        // 미리보기 이미지 초기화
+        const preview = document.getElementById("preview");
+        const input = document.getElementById("comment-file"); // 파일 선택창
+
+        if (preview) {
+            preview.src = "";
+            preview.classList.add("d-none"); // 미리보기 숨기기
+        }
+
+        if (input) {
+            input.value = ""; // 파일 선택 초기화
+        }
     }
 
     // 페이지 로드 시 댓글 목록 자동 로드 및 댓글 열고 닫기 로직 추가

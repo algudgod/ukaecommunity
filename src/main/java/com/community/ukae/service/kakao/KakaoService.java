@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +35,18 @@ public class KakaoService {
                 throw new RuntimeException("kakao_account 정보가 Map 형태가 아닙니다.");
             }
 
-            @SuppressWarnings("unchecked")
             Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoAccountObj;
 
             String name = (String) kakaoAccount.get("name");
             String email = (String) kakaoAccount.get("email");
             String phone = (String) kakaoAccount.get("phone_number");
             logger.info("카카오 사용자 정보: name={}, email={}", name, email);
-            return new KakaoRequestDTO(name, email, formatPhoneNumber(phone));
+
+            // formatPhoneNumber 메서드의 반환값인 Optional을 처리
+            Optional<String> formattedPhoneOpt = formatPhoneNumber(phone);
+            String formattedPhone = formattedPhoneOpt.orElse(null); // 값이 없을 경우 null로 설정
+
+            return new KakaoRequestDTO(name, email, formattedPhone);
         } catch (Exception e) {
             logger.error("카카오 사용자 정보 가져오기 실패: {}", e.getMessage(), e);
             throw new RuntimeException("카카오 사용자 정보를 가져오는 데 실패했습니다.");
@@ -55,16 +60,17 @@ public class KakaoService {
     }
 
     // 핸드폰 번호 포맷팅
-    private String formatPhoneNumber(String phone) {
+    private Optional<String> formatPhoneNumber(String phone) {
         if (phone == null) {
-            return null; // 전화번호가 없는 경우
+            return Optional.empty(); // 전화번호가 없는 경우 빈 Optional 반환
         }
         // 한국 국제번호 +82를 국내 번호 형식으로 변환
         if (phone.startsWith("+82")) {
             phone = "0" + phone.substring(3);
         }
         // 공백 및 하이픈 제거
-        return phone.replaceAll("[\\s-]", "");
+        String formattedPhone = phone.replaceAll("[\\s-]", "");
+        return Optional.of(formattedPhone);
     }
 
     // 회원가입 뷰 생성
