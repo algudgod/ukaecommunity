@@ -15,4 +15,6 @@ public class CommentResponseDTO {
     private String content;
     private LocalDateTime createDate;
 
+    private String imageUrl;
+
 }

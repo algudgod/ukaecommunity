@@ -171,6 +171,7 @@
                        th:text="${board.commentCount}">
                     </a>
                 </h5>
+
                 <!-- 댓글 영역 -->
                 <div id="comment-section">
 
@@ -185,6 +186,8 @@
                                 </div>
 
                                 <div class="comment-body">
+                                    <div class="comment-image-container mb-1"></div>
+
                                     <div class="comment-content-row">
                                         <p class="comment-content"></p>
                                         <div class="comment-actions">
@@ -295,8 +298,12 @@
         const commentList = document.querySelector(".comment-list"); // 댓글 리스트 영역
         const template = document.querySelector("#comment-template"); // 숨겨진 템플릿 가져오기
 
-        commentList.innerHTML = ""; // 기존 댓글 초기화하여 새 댓글 렌더링
-
+        // 댓글 초기화 (템플릿은 유지)
+          for (const child of commentList.children) {
+            if (child !== template) {
+                child.remove();
+            }
+        }
         // 서버에서 받은 댓글 데이터 반복 처리
         comments.forEach(comment => {
             const clone = template.cloneNode(true); // 템플릿 복사
@@ -307,6 +314,17 @@
             clone.querySelector(".comment-nickname").textContent = comment.nickname;
             clone.querySelector(".comment-date").textContent = formatDate(comment.createDate);
             clone.querySelector(".comment-content").textContent = comment.content;
+            // 댓글 이미지 삽입
+            const imageContainer = clone.querySelector(".comment-image-container"); // 이미지가 들어갈 컨테이너 찾기
+            if (comment.imageUrl) { // 만약 이미지가 존재하면?
+                const imgTag = document.createElement("img"); // <img> 태그를 새로 만들기
+                imgTag.src = comment.imageUrl; // 이미지 경로 설정
+                imgTag.alt = "댓글 이미지"; // 이미지가 안 뜰 때 대체 텍스트
+                imgTag.style.maxWidth = "150px"; // 이미지 크기 제한
+                imageContainer.appendChild(imgTag); // 댓글 이미지 컨테이너에 추가
+            } else { // 만약 이미지가 없다면?
+                imageContainer.style.display = "none"; // 이미지 컨테이너를 숨김 처리
+            }
 
             // 본인 댓글만 수정/삭제 버튼 보이기
             if (comment.nickname === document.getElementById("loggedInUserNickname").value) {
@@ -351,6 +369,37 @@
             preview.classList.add("d-none");  // 이미지 없으면 숨기기
         }
     }
+
+    // 페이지 로드 시 댓글 목록 자동 로드 및 댓글 열고 닫기 로직 추가
+    document.addEventListener("DOMContentLoaded", () => {
+
+        console.log("DOMContentLoaded 실행됨! 템플릿 존재 여부:", document.getElementById("comment-template"));
+    const templateParent = document.getElementById("comment-template").parentElement;
+    console.log("📌 템플릿 부모 요소:", templateParent);
+
+    if (templateParent) {
+        console.log("📌 부모 요소 내용 확인:", templateParent.innerHTML);
+    }
+        const boardNo = document.querySelector("#boardNo").value; // 게시글 번호 가져오기
+        loadComments(boardNo); // 댓글 목록 불러오기
+
+        // 댓글 열고 닫기 로직
+        const toggleComments = document.getElementById("toggle-comments");
+        const commentSection = document.getElementById("comment-section");
+
+        // 초기 상태 (열림)
+        let isOpen = true;
+
+        // 댓글 열고 닫기 이벤트
+        toggleComments.addEventListener("click", () => {
+            isOpen = !isOpen; // 상태 반전
+            if (isOpen) {
+                commentSection.style.display = "block"; // 댓글 열기
+            } else {
+                commentSection.style.display = "none"; // 댓글 닫기
+            }
+        });
+    });
 
     // 댓글 등록 함수
     function addComment(event) {
@@ -403,14 +452,15 @@
 
    // 댓글 리스트 업데이트(등록한 댓글이 추가됨을 보여주는 것)
     function updateCommentList(data) {
+        console.log("updateCommentList 실행됨!");
+        console.log("템플릿 존재 여부 (updateCommentList 실행 시점):", document.getElementById("comment-template"));
         console.log("updateCommentList 서버 응답 데이터:", data); // 데이터 확인
 
         const commentList = document.querySelector(".comment-list");
         const template = document.getElementById("comment-template"); // 원본 템플릿 가져오기
         console.log("가져온 template:", template); // 템플릿 내용을 확인
-        const newComment = template.cloneNode(true); // 템플릿 복사
-        console.log("복사된 템플릿:", newComment); // 템플릿 내용을 확인
 
+        const newComment = template.cloneNode(true); // 템플릿 복사
         newComment.style.display = "block"; // 숨겨진 템플릿 표시
         newComment.setAttribute("data-comment-no", data.commentNo);
         newComment.querySelector(".comment-nickname").textContent = data.nickname || "익명"; // 닉네임
@@ -423,7 +473,6 @@
         const editButton = newComment.querySelector(".comment-edit-btn");
         const deleteButton = newComment.querySelector(".comment-delete-btn");
         const actions = newComment.querySelector(".comment-actions");
-
 
         // 본인 댓글인 경우 수정/삭제 버튼 보이게 설정
         if (data.nickname === loggedInUserNickname) {
@@ -444,6 +493,26 @@
 
         // 댓글 리스트에 새 댓글 추가
         commentList.appendChild(newComment);
+        updateCommentCount(1); // 댓글이 추가되면 개수 +1
+    }
+
+    // 댓글 개수 업데이트 함수
+    function updateCommentCount(change) {
+        const commentCountElement = document.querySelector("#toggle-comments a");
+
+        // 현재 댓글 개수 가져오기
+        let currentCount = Number(commentCountElement.textContent) || 0;
+
+        // 댓글 개수 업데이트
+        currentCount += change;
+        commentCountElement.textContent = currentCount;
+
+        // 댓글 개수가 0이면 숨김 처리
+        if (currentCount <= 0) {
+            commentCountElement.style.display = "none";
+        } else {
+            commentCountElement.style.display = "inline"; // 다시 보이게 설정
+        }
     }
 
     // 입력창 초기화
@@ -464,29 +533,6 @@
             input.value = ""; // 파일 선택 초기화
         }
     }
-
-    // 페이지 로드 시 댓글 목록 자동 로드 및 댓글 열고 닫기 로직 추가
-    document.addEventListener("DOMContentLoaded", () => {
-        const boardNo = document.querySelector("#boardNo").value; // 게시글 번호 가져오기
-        loadComments(boardNo); // 댓글 목록 불러오기
-
-        // 댓글 열고 닫기 로직
-        const toggleComments = document.getElementById("toggle-comments");
-        const commentSection = document.getElementById("comment-section");
-
-        // 초기 상태 (열림)
-        let isOpen = true;
-
-        // 댓글 열고 닫기 이벤트
-        toggleComments.addEventListener("click", () => {
-            isOpen = !isOpen; // 상태 반전
-            if (isOpen) {
-                commentSection.style.display = "block"; // 댓글 열기
-            } else {
-                commentSection.style.display = "none"; // 댓글 닫기
-            }
-        });
-    });
 
     // 글자 수 카운트 함수
     document.getElementById("comment-content").addEventListener("input", function () {
@@ -634,6 +680,9 @@
                 const commentElement = document.querySelector(`[data-comment-no="${commentNo}"]`);
                 if (commentElement) {
                     commentElement.remove();
+
+                    updateCommentCount(-1); // 댓글 개수 동기화
+
                 }
             })
             .catch((error) => {

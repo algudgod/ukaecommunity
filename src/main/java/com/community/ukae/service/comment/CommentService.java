@@ -18,9 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -93,15 +92,28 @@ public class CommentService {
     public List<CommentResponseDTO> getCommentListByBoardNo(int boardNo) {
         logger.info("댓글 목록 요청: boardNo={}", boardNo);
 
+        // 댓글 목록 가져오기
         List<Comment> comments = commentRepository.findByBoard_boardNo(boardNo);
         logger.info("조회된 댓글 수: {}", comments.size());
 
+        // 가져온 댓글 목록에서 commentNo만 뽑아 List에 담기
+        List<Integer> commentNos = comments.stream()
+                .map(Comment::getCommentNo)
+                .collect(Collectors.toList());
+
+        List<ImageFile> imageFiles = imageFileRepository.findByComment_CommentNoIn(commentNos);
+        Map<Integer, String> imageUrlMap = imageFiles.stream()
+                .collect(Collectors.toMap(image -> image.getComment().getCommentNo(), ImageFile::getImageUrl));
+
         List<CommentResponseDTO> commentResponseList = new ArrayList<>();
         for (Comment comment : comments) {
+            String imageUrl = imageUrlMap.getOrDefault(comment.getCommentNo(), null);
+
             CommentResponseDTO responseDTO = CommentResponseDTO.builder()
                     .commentNo(comment.getCommentNo())
                     .nickname(comment.getUser().getNickname())
                     .content(comment.getContent())
+                    .imageUrl(imageUrl) // 이미지 추가!
                     .createDate(comment.getCreateDate())
                     .build();
 
@@ -155,7 +167,7 @@ public class CommentService {
     }
 
     // 댓글 조회
-    public Comment findCommentByCommentNo(int commentNo){
+    public Comment findCommentByCommentNo(int commentNo) {
         return commentRepository.findByCommentNo(commentNo)
                 .orElseThrow(() -> new NoSuchElementException("해당 댓글을 찾을 수 없습니다."));
     }

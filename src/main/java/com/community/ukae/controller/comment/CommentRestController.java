@@ -29,27 +29,18 @@ public class CommentRestController {
     private final CommentService commentService;
     private final S3Service s3Service;
 
-    // 댓글 저장
+    // 댓글 등록
     @PostMapping("/addComment")
     public ResponseEntity<CommentResponseDTO> addComment(@RequestParam(value = "file", required = false) MultipartFile file,
                                                          @RequestParam("content") String content,
                                                          @RequestParam("boardNo") int boardNo,
                                                          HttpSession session) {
-/*        // 세션에서 사용자 정보 가져오기
+        // 세션에서 사용자 정보 가져오기
         User user = (User) session.getAttribute("user");
         if (user == null) {
             log.warn("댓글 등록 요청 실패: 사용자 인증 필요");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }*/
-        // 테스트용 사용자 설정
-        User user = (User) session.getAttribute("user");
-        if (user == null) { // 세션에 사용자 정보가 없을 때
-            user = new User();
-            user.setLoginId("nurungzi");
-            user.setNickname("누룽지");
-            session.setAttribute("user", user); // 세션에 저장
         }
-
         try {
             log.info("댓글 등록 요청: user={}, content={}, boardNo={}", user.getLoginId(), content, boardNo);
 
