@@ -374,12 +374,14 @@
     document.addEventListener("DOMContentLoaded", () => {
 
         console.log("DOMContentLoaded 실행됨! 템플릿 존재 여부:", document.getElementById("comment-template"));
-    const templateParent = document.getElementById("comment-template").parentElement;
-    console.log("📌 템플릿 부모 요소:", templateParent);
 
-    if (templateParent) {
-        console.log("📌 부모 요소 내용 확인:", templateParent.innerHTML);
-    }
+        const templateParent = document.getElementById("comment-template").parentElement;
+        console.log("템플릿 부모 요소:", templateParent);
+
+        if (templateParent) {
+            console.log("부모 요소 내용 확인:", templateParent.innerHTML);
+        }
+
         const boardNo = document.querySelector("#boardNo").value; // 게시글 번호 가져오기
         loadComments(boardNo); // 댓글 목록 불러오기
 

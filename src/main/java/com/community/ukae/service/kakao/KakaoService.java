@@ -29,14 +29,18 @@ public class KakaoService {
         try {
             OAuth2User oAuth2User = authentication.getPrincipal();
             Map<String, Object> attributes = oAuth2User.getAttributes();
-            Object kakaoAccountObj = attributes.get("kakao_account");
 
-            if (!(kakaoAccountObj instanceof Map)) {
+            // kakao_account가 Map인지 확인
+            Object kakaoAccountObj = attributes.get("kakao_account");
+            if (!(kakaoAccountObj instanceof Map<?, ?>)) {
                 throw new RuntimeException("kakao_account 정보가 Map 형태가 아닙니다.");
             }
 
+            // 안전하게 캐스팅
+            @SuppressWarnings("unchecked")
             Map<String, Object> kakaoAccount = (Map<String, Object>) kakaoAccountObj;
 
+            // 사용자 정보 추출
             String name = (String) kakaoAccount.get("name");
             String email = (String) kakaoAccount.get("email");
             String phone = (String) kakaoAccount.get("phone_number");

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -235,6 +236,7 @@ public class BoardService {
     }
 
     // 게시글 삭제
+    @Transactional
     public void deleteBoard(int boardNo, User user) {
         Board board = boardRepository.findByBoardNo(boardNo)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글을 찾을 수 없습니다."));
@@ -245,6 +247,7 @@ public class BoardService {
             throw new IllegalArgumentException("삭제 권한이 없습니다.");
         }
 
+        commentRepository.deleteByBoard(board);
         boardRepository.delete(board);
 
     }

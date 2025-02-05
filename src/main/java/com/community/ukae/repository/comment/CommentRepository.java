@@ -1,5 +1,6 @@
 package com.community.ukae.repository.comment;
 
+import com.community.ukae.entity.board.Board;
 import com.community.ukae.entity.comment.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,9 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
         FROM comment
         WHERE board_no = ?; */
     int countByBoardBoardNo(int boardNo);
+
+    // 삭제
+    void deleteByBoard(Board board);
+
 
 }
